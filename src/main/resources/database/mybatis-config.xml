@@ -8,6 +8,6 @@
          <setting name="mapUnderscoreToCamelCase" value="true" />
      </settings>
     <typeHandlers>
-        <typeHandler handler="im.im.vinci.server.common.dbhandler.ValueNodeStringTypeHandler" javaType="com.fasterxml.jackson.databind.JsonNode" />
+        <typeHandler handler="im.vinci.server.common.dbhandler.ValueNodeStringTypeHandler" javaType="com.fasterxml.jackson.databind.JsonNode" />
     </typeHandlers>
 </configuration>

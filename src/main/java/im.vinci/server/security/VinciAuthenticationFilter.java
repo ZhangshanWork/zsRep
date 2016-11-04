@@ -1,16 +1,9 @@
 package im.vinci.server.security;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import im.vinci.monitor.AccessRecorder;
 import im.vinci.monitor.util.SystemTimer;
 import im.vinci.server.common.exceptions.VinciAuthenticationException;
-import im.vinci.server.common.exceptions.VinciException;
-import im.vinci.server.common.exceptions.error.ErrorCode;
-import im.vinci.server.user.domain.UserBindDevice;
-import im.vinci.server.user.domain.UserInfo;
-import im.vinci.server.utils.UserContext;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
@@ -31,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -65,33 +57,6 @@ public class VinciAuthenticationFilter {
     public void doFilter() {
         HttpServletRequest request =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        AccessRecorder recorder = AccessRecorder.getAccessRecorder();
-        Method method = recorder.getMethod();
-        if (recorder.getMethod() == null || !method.isAnnotationPresent(ApiSecurityLabel.class)) {
-            return;
-        }
-        ApiSecurityLabel[] labels = method.getAnnotationsByType(ApiSecurityLabel.class);
-        if (labels == null || labels.length != 1 || labels[0] == null) {
-            throw new VinciAuthenticationException("ApiSecurityLabel配置问题");
-        }
-        ApiSecurityLabel label = labels[0];
-        if (label.isCheckLogin()) {
-            UserInfo userInfo = UserContext.getUserInfo();
-            if (userInfo == null) {
-                throw new VinciException(ErrorCode.NEED_LOGIN,"需要登录","需要登录");
-            }
-            String sn = request.getHeader("sn");
-            boolean isOk = false;
-            for (UserBindDevice bindDevice :userInfo.getBindDevices().values()) {
-                if (bindDevice != null && Objects.equal(bindDevice.getDeviceId(),sn)) {
-                    isOk = true;
-                    break;
-                }
-            }
-            if (!isOk) {
-                throw new VinciException(ErrorCode.NEED_LOGIN,"登录用户和绑定设备不匹配","登录用户和绑定设备不匹配");
-            }
-        }
         String clientSignString = request.getHeader("sign");
         if (godSign != null && godSign.equals(clientSignString)) {
             logger.info("this request passed for god sign");
