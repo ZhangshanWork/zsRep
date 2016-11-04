@@ -1,0 +1,74 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorator="layout">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<th:block layout:fragment="less">
+		<link rel="stylesheet/less" th:href="@{/less/history.less}" href="../../../less/history.less"/>
+	</th:block>
+</head>
+<body layout:fragment="content">
+	<form action="/vinci/device/otaconfig/index" method="get" id="return2index">
+		<input type="hidden" th:value="${region_code}" name="region_code" id="curr_region_code"/>
+		<input type="hidden" th:value="${hardware_code}" name="hardware_code" id="curr_hardware_code"/>
+		<button class="btn btn-success return">返回修改页面</button>
+	</form>
+	<div class="container text-center">
+		<div class="row">
+			<div class="col-lg-12">
+				<table class="table">
+					<tr id="table_head">
+						<td class="t1">目标版本</td>
+						<td class="t2">状态</td>
+						<td colspan="3" class="t3">描述</td>
+						<td colspan="3" class="t31">英文描述</td>
+						<td class="t4">时间</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button class="close" type="button" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">目标版本V1.2.4</h4>
+				</div>
+				<div class="modal-body">
+						<div class="row">
+							<div class="col-lg-6 text-right">
+								目标版本:
+							</div>
+							<div class="col-lg-6 text-left sys-version-name">
+								V1.2.4
+							</div>
+							<div class="col-lg-6 text-right">
+								desc:
+							</div>
+							<div class="col-lg-6 text-left desc">
+								desc
+							</div>
+							<div class="col-lg-6 text-right">
+								desc_en:
+							</div>
+							<div class="col-lg-6 text-left desc_en">
+								desc_en
+							</div>
+							<div class="col-lg-6 text-right">
+								状态:
+							</div>
+							<div class="col-lg-6 text-left status">
+								测试
+							</div>
+							<div class="col-lg-12 text-center versionPack">
+								Version package
+							</div>
+						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script th:attr="src=@{/js/history.js}" src="../../../js/history.js"></script>
+</body>
+</html>

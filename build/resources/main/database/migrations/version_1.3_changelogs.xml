@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1_insert_data" author="tianlong">
+        <insert tableName="rom_ota_config">
+            <column name="sys_version_name" value="V1.2.0"/>
+            <column name="desc" value='【更聪明】  \n1.除了戴上就听，对我说\"心动电台\" \"随便听听\",也可以进入你的个人智能推荐电台啦; \n\n2.说\"我的歌单/我收藏的\",我就会调出你双击收藏过的歌曲。\n\n3.下滑菜单里增加了3G选项和飞行模式开关
+            。\n\n【更乖】 \n1.VINCI极客男神为你修了一些bug,现在歌曲播放流程更加顺畅了,系统更加稳定了。 \n\n2.当你插入音频线听其他音源时也可以顺利播放啦! \n\n软件开发正在快马加鞭的每周进行。请期待Me系统在V1.3的下次成长吧!\n感谢包容。下周见~"'/>
+            <column name="status" value="3"/>
+        </insert>
+        <insert tableName="system_version">
+            <column name="version_name" value="V0.9.1"/>
+            <column name="is_forced" valueBoolean="false"/>
+            <column name="is_full" valueBoolean="false"/>
+            <column name="addr" value="http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_v0.9.1_v1.2.0.zip"/>
+            <column name="hash" value="6f6e963f882881909d8f9a1c2b9e01a5"/>
+            <column name="length" value="37019952"/>
+            <column name="config_id" valueComputed="(SELECT id FROM rom_ota_config WHERE sys_version_name ='V1.2.0' and `status` = 3)"/>
+        </insert>
+        <insert tableName="system_version">
+            <column name="version_name" value="V1.0.1"/>
+            <column name="is_forced" valueBoolean="false"/>
+            <column name="is_full" valueBoolean="false"/>
+            <column name="addr" value="http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_v1.0.1_v1.2.0.zip"/>
+            <column name="hash" value="5b06ebac01ee1b56013fbd46c273e79f"/>
+            <column name="length" value="37126710"/>
+            <column name="config_id" valueComputed="(SELECT id FROM rom_ota_config WHERE sys_version_name ='V1.2.0' and `status` = 3)"/>
+        </insert>
+        <insert tableName="system_version">
+            <column name="version_name" value="V1.1.0"/>
+            <column name="is_forced" valueBoolean="true"/>
+            <column name="is_full" valueBoolean="false"/>
+            <column name="addr" value="http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_v1.1.0_v1.2.0.zip"/>
+            <column name="hash" value="57b49f5501097a6788808fcd81da77ce"/>
+            <column name="length" value="36399670"/>
+            <column name="config_id" valueComputed="(SELECT id FROM rom_ota_config WHERE sys_version_name ='V1.2.0' and `status` = 3)"/>
+        </insert>
+        <insert tableName="system_version">
+            <column name="version_name" value="V1.1.1"/>
+            <column name="is_forced" valueBoolean="false"/>
+            <column name="is_full" valueBoolean="false"/>
+            <column name="addr" value="http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_v1.1.1_v1.2.0.zip"/>
+            <column name="hash" value="31234141b61f358691ec50936d7414e6"/>
+            <column name="length" value="36387252"/>
+            <column name="config_id" valueComputed="(SELECT id FROM rom_ota_config WHERE sys_version_name ='V1.2.0' and `status` = 3)"/>
+        </insert>
+        <insert tableName="system_version">
+            <column name="version_name" value="V1.1.2"/>
+            <column name="is_forced" valueBoolean="false"/>
+            <column name="is_full" valueBoolean="false"/>
+            <column name="addr" value="http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_v1.1.2_v1.2.0.zip"/>
+            <column name="hash" value="8fd97daca5084d3c7230045b4744ed4a"/>
+            <column name="length" value="36376265"/>
+            <column name="config_id" valueComputed="(SELECT id FROM rom_ota_config WHERE sys_version_name ='V1.2.0' and `status` = 3)"/>
+        </insert>
+        <rollback>
+            <delete tableName="rom_ota_config" />
+            <delete tableName="system_version" />
+        </rollback>
+    </changeSet>
+    <changeSet id="2015_12_24_create_table_preset_music" author="ZhengKai">
+        <createTable tableName="preset_music">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="song_id" type="INT UNSIGNED" remarks="歌曲ID,即music表里song_id字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="song_name" type="VARCHAR(200)" remarks="歌曲名称,即music表里song_name字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="music_id" type="INT UNSIGNED" remarks="音乐ID,即某张music表里的id字段">
+            </column>
+            <column name="music_source" type="VARCHAR(40)" remarks="音乐来源,这首音乐属于那张表,如:xiami,那么根据music_type和music_id就可以最终确定这首歌数据">
+            </column>
+            <column name="scene_id" type="INT(10) UNSIGNED" remarks="场景ID,即scene表里id字段">
+                <constraints nullable="false" foreignKeyName="fk_preset_music_scene_id" references="scene(id)" deleteCascade="true" />
+            </column>
+            <column name="scene_name" type="VARCHAR(200)" remarks="场景名称,即scene表里name字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="version" type="SMALLINT UNSIGNED" remarks="预置歌曲的版本号,整个表的所有数据改值应该是一样的">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2015_12_24_create_table_scene_tag" author="ZhengKai">
+        <createTable tableName="scene_tag">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="tag_name" type="VARCHAR(40)" remarks="歌曲ID,即music表里song_id字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="scene_id" type="INT(10) UNSIGNED" remarks="场景ID,即scene表里id字段">
+                <constraints nullable="false" foreignKeyName="fk_scene_tag_scene_id" references="scene(id)" deleteCascade="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2015_12_24_create_table_user_preset_music" author="ZhengKai">
+        <createTable tableName="user_preset_music">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="account_id" type="INT UNSIGNED" remarks="用户ID,即account表里的id字段">
+                <constraints nullable="false" foreignKeyName="fk_user_preset_music_account_id" references="account(id)" deleteCascade="true" />
+            </column>
+            <column name="device_id" type="VARCHAR(40)" remarks="设备ID,即account表里的device_id字段,现在device_id记录的是头机的imei值">
+                <constraints nullable="false" />
+            </column>
+            <column name="song_id" type="INT UNSIGNED" remarks="歌曲ID,即music表里song_id字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="music_id" type="INT UNSIGNED" remarks="音乐ID,即某张music表里的id字段">
+            </column>
+            <column name="music_source" type="VARCHAR(40)" remarks="音乐来源,这首音乐属于那张表,如:xiami,那么根据music_type和music_id就可以最终确定这首歌数据">
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
+
+
+

@@ -1,0 +1,23 @@
+es服务器各个index的增删改查实现
+index目录下定义一系列的index接口,接口定义各种curd方法
+impl目录下各个ESAccessor类实现index目录下的各个index接口的定义方法
+
+elasticsearch---|
+                |---index---|
+                |           |---XiaMiMusic
+                |           |
+                |           |---UserLogs
+                |           |
+                |           |---...<other index>
+                |
+                |---impl---|
+                |          |---XiaMiMusicESAccessor
+                |          |
+                |          |---UserLogESAccessor
+                |          |
+                |          |---...<other ESAccessor>
+                |
+                |---base---|
+                           |---CommonFunc
+                           |
+                           |---ESAccessor

@@ -1,0 +1,187 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" layout:decorator="layout">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Vinci-server</title>
+	<th:block layout:fragment="less">
+		<link rel="stylesheet/less" th:href="@{/less/index.less}" href="../../../less/index.less"/>
+	</th:block>
+</head>
+<body layout:fragment="content">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="col-lg-12 head-input">
+					<form action="/vinci/device/otaconfig/index" class="form-inline" id="change_region_hardware_form">
+						<span>地域:</span>
+						<select id="curr_region_code" form="change_region_hardware_form" name="region_code">
+							<option th:each="region:${all_region_code}" th:value="${region}" th:text="${region.desc}"
+									th:selected="${region.equals(region_code)}"/>
+						</select>
+						<span>硬件:</span>
+						<select id="curr_hardware_code" form="change_region_hardware_form" name="hardware_code">
+							<option th:each="hardware:${all_hardware_code}" th:value="${hardware}" th:text="${hardware.desc}"
+									th:selected="${hardware==hardware_code}"/>
+						</select>
+					</form>
+					<!--<button type="submit" class="btn btn-primary foot-button" data-toggle="modal" form="change_region_hardware_form">切换</button>-->
+				</div>
+				<div class="col-lg-12 head-input">
+					<div class="current-version col-lg-10">
+						<form action="" class="form-inline">
+							<div class="form-group">
+								<label for="sys_version_name">SYS_VERSION_NAME:</label>
+								<div class="input-group col-lg-6" id="sys_version_name">
+									<div class="input-group-addon">V</div>
+									<input type="text" class="form-control sys-version-name-num" placeholder="0~9"/>
+									<div class="input-group-addon">.</div>
+									<input type="text" class="form-control sys-version-name-num" placeholder="0~9"/>
+									<div class="input-group-addon">.</div>
+									<input type="text" class="form-control sys-version-name-num" placeholder="0~9"/>
+								</div>
+							</div>
+							<p class="error_version_show"></p>
+						</form>
+						<div class="show" id="current_version_show"></div>
+						<div class="desc">
+							<h4>描述:</h4>
+							<textarea name="desc" id="desc" cols="30" rows="5" class="form-control"></textarea>
+						</div>
+						<div class="desc">
+							<h4>英文描述:</h4>
+							<textarea name="desc_en" id="desc_en" cols="30" rows="5" class="form-control"></textarea>
+						</div>
+					</div>
+					<button type="button" class="btn-primary btn" id="sys_version_name_save" disabled="true">保存</button>
+					<button type="button" class="btn-danger btn" id="sys_version_name_change">修改</button>
+				</div>
+				<div class="col-lg-12 mac">
+					<form action="" class="form-inline">
+						<div class="form-group">
+							<label for="mac" class="mac-title">填写测试IMEI:</label>
+							<input type="text" class="form-control mac-addr" placeholder="IMEI"/>
+						</div>
+					</form>
+					<button type="button" class="btn btn-primary increase-mac" disabled="true">添加IMEI</button>
+					<button type="button" class="btn btn-danger all-mac">查看所有IMEI</button>
+					<p class="mac-status text-center"></p>
+					<table class="table table-striped mac-table">
+						<tr class="mac-head">
+							<td>ID</td>
+							<td>IMEI</td>
+							<td></td>
+						</tr>
+
+					</table>
+				</div>
+				<div class="col-lg-12 package-table">
+					<table class="table table-package">
+						<tr id="table_head">
+							<td class="table-head">Version</td>
+							<td class="table-head">is_forced</td>
+							<td class="table-head">is_full</td>
+							<td class="table-head">addr</td>
+							<td class="table-head">hash</td>
+							<td class="table-head">length</td>
+							<td>
+								<button type="button" class="btn-success btn" id="increase_version_package">新增</button>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button class="close" type="button" data-dismiss="modal" aria-label="close"><span aria-hidden="true">&times;</span></button>
+								<h4 class="modal-title" id="myModalLabel">删除确认</h4>
+							</div>
+							<div class="modal-body">
+								
+							</div>
+							<div class="modal-footer">
+								<button class="btn btn-default" type="button" data-dismiss="modal">取消</button>
+								<button class="btn btn-primary delete_version" data-dismiss="modal" type="button">确认删除</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-10 col-lg-offset-1 input-card">
+					<form action="" class="form-horizontal">
+						<div class="form-group">
+							<label class="col-lg-2 old-input-label">is_full:</label>
+							<div class="col-lg-3 input-group">
+								<select name="" class="form-control" id="is_full">
+									<option value="false">false</option>
+									<option value="true">true</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="" class="col-lg-2 old-input-label">Version:</label>
+							<div class="col-lg-3 input-group">
+								<div class="input-group-addon">V</div>
+								<input type="text" class="form-control old-sys-version-name-num" id="version_num_1" placeholder="0~9"/>
+								<div class="input-group-addon">.</div>
+								<input type="text" class="form-control old-sys-version-name-num" id="version_num_2" placeholder="0~9"/>
+								<div class="input-group-addon">.</div>
+								<input type="text" class="form-control old-sys-version-name-num" id="version_num_3" placeholder="0~9"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-lg-2 old-input-label">is_forced:</label>
+							<div class="col-lg-3 input-group">
+								<select name="" class="form-control" id="is_forced">
+									<option value="false">false</option>
+									<option value="true">true</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="" class="col-lg-2 old-input-label">addr</label>
+							<div class="col-lg-7 input-group">
+								<div class="input-group-addon" id="pre_addr">http://inspero-ota.oss-cn-beijing.aliyuncs.com/ota_</div>
+								<input type="text" class="form-control" placeholder="v0.9.1_v1.1.2" id="addr"/>
+								<div class="input-group-addon">.zip</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="" class="col-lg-2 old-input-label">hash</label>
+							<div class="col-lg-7 input-group">
+								<input type="text" class="form-control text-input" id="hash" placeholder="请输入32位hash" maxlength="32"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="" class="col-lg-2 old-input-label">length</label>
+							<div class="col-lg-7 input-group">
+								<input type="text" class="form-control text-input" id="length" placeholder="请输入长度（数字）"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-lg-10 col-lg-offset-2">
+								<button type="button" class="btn btn-default" id="increase_version" disabled="true">增加</button>
+								<button type="button" class="btn btn-default" id="cancel_increase_version">取消</button>
+							</div>
+						</div>
+						<p id="error_info"></p>
+					</form>
+				</div>
+				<div class="col-lg-4 finish">
+					<button type="button" class="btn btn-danger foot-button" id="finish" data-toggle="modal" data-target="#myModal">提交</button>
+				</div>
+				<div class="col-lg-4 publish">
+					<button type="button" class="btn btn-success foot-button" id="publish">发布</button>
+				</div>
+				<div class="col-lg-4 history">
+					<button type="button" class="btn btn-primary foot-button" id="history" data-toggle="modal">查看历史</button>
+				</div>
+				<div class="col-lg-12">
+					<p id="commit_status"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script th:attr="src=@{/js/index.js}" src="../../../js/index.js"></script>
+</body>
+</html>

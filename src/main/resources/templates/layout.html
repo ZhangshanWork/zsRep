@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<head>
+    <title>Layout</title>
+    <link rel="stylesheet"
+          th:href="@{/css/bootstrap.min.css}"
+          href="../../css/bootstrap.min.css"/>
+    <th:block layout:fragment="less"></th:block>
+    <script>
+        less = {
+            env: "development",
+            async: false,
+            fileAsync: false,
+            poll: 1000,
+            functions: {},
+            dumpLineNumbers: "comments",
+            relativeUrls: false
+        };
+    </script>
+
+    <script th:attr="src=@{/js/jquery-1.11.3.min.js}" src="../../js/jquery-1.11.3.min.js"></script>
+    <script th:attr="src=@{/js/bootstrap.min.js}" src="../../js/bootstrap.min.js"></script>
+    <script th:attr="src=@{/js/less-1.7.0.min.js}" src="../../js/less-1.7.0.min.js"></script>
+</head>
+<body>
+    <h1 layout:fragment="header" class="text-center header">OTA升级配置系统</h1>
+    <div layout:fragment="content">
+        Fake content
+    </div>
+</body>
+</html>
