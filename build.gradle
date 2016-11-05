@@ -108,8 +108,8 @@ def getBranch = {
 }
 
 sourceCompatibility = 1.8
-//version = getVersion()+getBranch()
-version = 404
+version = getVersion()+getBranch()
+//version = 404
 
 
 repositories {
