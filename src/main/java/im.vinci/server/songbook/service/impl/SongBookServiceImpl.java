@@ -7,7 +7,6 @@ import im.vinci.server.recomd.service.RecomdService;
 import im.vinci.server.search.domain.music.MusicSong;
 import im.vinci.server.search.service.XiamiMusicSearchService;
 import im.vinci.server.songbook.model.SongBook;
-import im.vinci.server.songbook.persistence.SongBookDao;
 import im.vinci.server.songbook.service.SongBookService;
 import im.vinci.server.utils.apiresp.ResponsePageVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,28 +24,23 @@ import java.util.Set;
 @Service
 public class SongBookServiceImpl implements SongBookService{
     @Autowired
-    SongBookDao songBookDao;
-
-    @Autowired
     XiamiMusicSearchService xiamiMusicSearchService;
     @Autowired
     RecomdService recomdService;
 
     @Override
     public List<SongBook> getSongBook(SongBook songBook) {
-        return songBookDao.getSongBook(songBook);
+        return null;
     }
 
     @Override
     public void doSave(List<SongBook> list) {
-        for(SongBook songBook:list) {
-            songBookDao.doSave(songBook);
-        }
+
     }
 
     @Override
     public void doDel(SongBook songBook) {
-        songBookDao.doDel(songBook);
+
     }
 
     @Override

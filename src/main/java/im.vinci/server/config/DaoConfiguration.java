@@ -1,32 +1,13 @@
 package im.vinci.server.config;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
-
 /**
  * Created by henryhome on 2/16/15.
  */
-@Configuration
-@MapperScan(value = {"im.vinci.server"},annotationClass = Repository.class)
+//@Configuration
+//@MapperScan(value = {"im.vinci.server"},annotationClass = Repository.class)
 public class DaoConfiguration {
 
-    @Configuration
+   /* @Configuration
     @Profile(UserProfile.INTG)
     @PropertySource("classpath:/intg/jdbc.properties")
     static class MysqlIntgConfiguration {
@@ -94,7 +75,7 @@ public class DaoConfiguration {
     	TransactionTemplate transactionTemplate = new TransactionTemplate();
     	transactionTemplate.setTransactionManager(dataSourceTransactionManager());
     	return transactionTemplate;
-    }
+    }*/
 
 }
 

@@ -6,7 +6,6 @@ import com.taobao.api.response.AlibabaXiamiApiSearchCollectsGetResponse;
 import im.vinci.server.naturelang.domain.MusicSemantic;
 import im.vinci.server.naturelang.domain.XMLYSemantic;
 import im.vinci.server.naturelang.listener.Context;
-import im.vinci.server.naturelang.persistence.NatureLangDao;
 import im.vinci.server.naturelang.service.NatureLangService;
 import im.vinci.server.naturelang.service.impl.process.ElasticHandler;
 import im.vinci.server.naturelang.service.impl.process.ElasticProcess;
@@ -14,13 +13,11 @@ import im.vinci.server.search.domain.himalayas.GetHimalayaAlbumDetailResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.elasticsearch.client.Client;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class NatureLangServiceImpl implements NatureLangService {
@@ -28,9 +25,6 @@ public class NatureLangServiceImpl implements NatureLangService {
 	@Resource(name = "esClient")
 	private Client client;
 	
-	@Autowired
-	private NatureLangDao natureLangDao;
-
 	private static DefaultTaobaoClient tclient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest"
 			, "23064829", "29ed3de5990627239d0fdbddd3e94b51", "json", 500000, 500000);
 
@@ -79,17 +73,6 @@ public class NatureLangServiceImpl implements NatureLangService {
         return response;
     }
 
-    //ArrayList<JSONArray> ArrayList<songs>
-	public ArrayList<JSONArray> getSongsFromNCollections_local(JSONArray collections,Map<String,String> cid_table){
-		ArrayList<JSONArray> songsFromCollections = new ArrayList<JSONArray>();
-		ArrayList<Long> collection_ids = getCollectionsId(collections);
-		for(Long id: collection_ids){
-			JSONArray songs = getSongsByCID_local(id,cid_table);
-			if(songs!=null)songsFromCollections.add(songs);
-		}
-		return songsFromCollections;
-	}
-	
 	public ArrayList<Long> getCollectionsId(JSONArray collections){
 
 		ArrayList<Long> collection_ids = new ArrayList<Long>();
@@ -128,11 +111,6 @@ public class NatureLangServiceImpl implements NatureLangService {
 			e.printStackTrace();
 			getCollections(keyword);
 		}
-		
 		return collections;
-	}
-
-	public JSONArray getSongsByCID_local(long id, Map<String,String> cid_table){
-		return JSONArray.fromObject(natureLangDao.getCollectionsById(id));
 	}
 }
