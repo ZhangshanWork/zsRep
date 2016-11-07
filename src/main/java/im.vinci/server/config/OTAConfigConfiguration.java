@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 /**
  * Created by ytl on 15/12/5.
  */
-//@Configuration
+@Configuration
 public class OTAConfigConfiguration extends WebMvcConfigurerAdapter  {
 
     @Configuration
