@@ -1,7 +1,6 @@
 package im.vinci.server.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import liquibase.integration.spring.SpringLiquibase;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
@@ -84,14 +83,6 @@ public class DaoConfiguration {
         return sqlSessionFactory.getObject();
     }
 
-    @Bean
-    public SpringLiquibase liquibaseConfiguration() {
-        SpringLiquibase liquibase = new SpringLiquibase();
-        // Disable detecting liquibase when spring boot is running
-        liquibase.setShouldRun(false);
-        return liquibase;
-    }
-    
     @Bean
     public DataSourceTransactionManager dataSourceTransactionManager() throws SQLException {
     	DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
