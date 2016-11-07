@@ -2,7 +2,7 @@
 <configuration>
     <if condition='property("log_home").length() == 0'>
         <then>
-            <property scope="context" name="log_home" value="/var/log/vinci" />
+            <property scope="context" name="log_home" value="/var/log/nlp" />
         </then>
     </if>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

@@ -2,7 +2,7 @@
 <configuration>
     <if condition='property("log_home").length() == 0'>
         <then>
-            <property scope="context" name="log_home" value="/var/log/vinci" />
+            <property scope="context" name="log_home" value="/var/log/nlp" />
         </then>
     </if>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -46,9 +46,9 @@
         </encoder>
     </appender>
     <appender name="httpAccess" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/vinci/httpAccess.log</file>
+        <file>/var/log/nlp/httpAccess.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/vinci/httpAccess.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/var/log/nlp/httpAccess.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
