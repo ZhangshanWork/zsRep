@@ -14,10 +14,7 @@ import org.springframework.context.annotation.Import;
         CacheConfiguration.class,
         ControllerConfiguration.class,
         ServiceConfiguration.class,
-        //DaoConfiguration.class,
         ElasticsearchConfiguration.class,
-        OnsConfiguration.class,
-        OTAConfigConfiguration.class,
 })
 public class VinciApplication {
 

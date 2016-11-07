@@ -16,7 +16,7 @@ import java.util.Properties;
  * 阿里云Ons消息队列的配置
  */
 
-@Configuration
+//@Configuration
 public class OnsConfiguration {
 
     @Autowired

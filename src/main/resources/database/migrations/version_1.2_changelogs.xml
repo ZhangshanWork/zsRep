@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1_create_rom_ota_config" author="tianlong">
+        <createTable tableName="rom_ota_config">
+            <column name="id" autoIncrement="true" type="INT UNSIGNED">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="sys_version_name" type="VARCHAR(50)" defaultValue="" remarks="目标版本">
+                <constraints nullable="false"/>
+            </column>
+            <column name="desc" type="VARCHAR(500)" defaultValue="" remarks="描述">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="TINYINT(2) UNSIGNED" defaultValue="1" remarks="0:删除，1:测试,2:测试过期,3:上线,4:上线过期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_modify_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2_create_system_version" author="tianlong">
+        <createTable tableName="system_version">
+            <column name="id" type="INT UNSIGNED" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="version_name" type="VARCHAR(50)" defaultValue="" remarks="历史版本">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_forced" type="BOOLEAN" defaultValueBoolean="false" remarks="是否强制升级">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_full" type="BOOLEAN" defaultValueBoolean="false" remarks="是否差分包">
+                <constraints nullable="false"/>
+            </column>
+            <column name="addr" type="VARCHAR(255)" defaultValue="" remarks="差分包地址">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hash" type="VARCHAR(255)" defaultValue="" remarks="差分包MD5">
+                <constraints nullable="false"/>
+            </column>
+            <column name="length" type="BIGINT(20)" defaultValue="0" remarks="差分包大小">
+                <constraints nullable="false"/>
+            </column>
+            <column name="config_id" type="INT UNSIGNED" remarks="配置ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_modify_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3_create_ota_test_mac" author="tianlong">
+        <createTable tableName="ota_test_mac">
+            <column name="id" type="INT UNSIGNED" autoIncrement="true">
+                <constraints nullable="true" primaryKey="true"/>
+            </column>
+            <column name="mac" type="VARCHAR(17)" defaultValue="" remarks="测试机MAC地址">
+                <constraints nullable="true"/>
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="last_modify_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4_add_column_desc_en" author="ZhongZhengKai">
+        <addColumn tableName="rom_ota_config">
+            <column name="desc_en" type="VARCHAR(500)" defaultValue=""  remarks="英文描述">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
+
+
+

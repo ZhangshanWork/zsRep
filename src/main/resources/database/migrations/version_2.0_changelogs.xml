@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="2016_07_19_add_user_login_and_bind_tables" author="Tim Wang">
+        <sql dbms="mysql"><!-- 用户基本信息表 -->
+            CREATE TABLE `real_user_info` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `login_source` varchar(32) NOT NULL DEFAULT '' COMMENT '注册来源, mobile weixin weibo ...',
+                `external_source_uid` varchar(128) NOT NULL DEFAULT '' COMMENT '第三方来源的uid',
+                `password` varchar(128) NOT NULL DEFAULT '' COMMENT '手机号注册的密码',
+                `nick_name` varchar(128) NOT NULL DEFAULT '' COMMENT '昵称',
+                `nick_name_check` varchar(128) NOT NULL DEFAULT '' COMMENT '昵称判重',
+                `location` varchar(256) NOT NULL DEFAULT '{}' COMMENT '位置,json: {country:xx,province:xx,city:xx}',
+                `sex` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1:male other:female',
+                `birth_date` varchar(10) NOT NULL DEFAULT '' COMMENT 'birthday',
+                `head_img` varchar(1024) NOT NULL DEFAULT '' COMMENT '头像,估计需要后面加个大小之类的东西',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `nick_name_check` (`nick_name_check`),
+                UNIQUE KEY `uniq_external_uid` (`login_source`,`external_source_uid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate=utf8mb4_bin COMMENT='用户基本信息表';
+        </sql>
+
+        <!-- 增加用户登录绑定设备和同步的数据库 -->
+        <!-- 每个用户当前绑定的设备号-->
+        <sql dbms="mysql">
+            CREATE TABLE `user_bind_device` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `real_user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'foreign key ref to real_user(`id`)',
+                `device_id` varchar(80) NOT NULL DEFAULT '' COMMENT '设备id,一般是设备的sn号',
+                `device_type` varchar(16) NOT NULL DEFAULT 'mobile' COMMENT '绑定的设备类型,headphone or mobile',
+                `imei` varchar(64) NOT NULL DEFAULT '' COMMENT '设备imei号,mobile尤其是iphone可能为随机码',
+                `mac`  varchar(64) NOT NULL DEFAULT '' COMMENT '设备mac地址',
+                `phone_model` varchar(1024) NOT NULL DEFAULT '{}' COMMENT '手机为型号,头机为几代什么颜色',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_user_id_device_type` (`real_user_id`,`device_type`),
+                KEY `index_device_id` (`device_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate=utf8mb4_bin COMMENT='用户绑定设备表';
+        </sql>
+        <rollback>
+            <dropTable tableName="real_user_info" />
+            <dropTable tableName="user_bind_device" />
+        </rollback>
+    </changeSet>
+
+    <!-- 用户收藏歌曲表 -->
+    <!--
+    <changeSet id="2016_10_14_add_user_song_collection" author="Tim Wang" dbms="mysql" runInTransaction="true">
+        <createTable tableName="user_song_coolection">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint(20)" defaultValue="0" remarks="用户id或称关注人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="song_id" type="bigint(20)" defaultValue="0" remarks="歌曲id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="song_type" type="varchar(20)" defaultValue="" remarks="歌曲来源type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="song_name" type="varchar(255)" defaultValue="" remarks="歌曲名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="artist" type="varchar(255)" defaultValue="" remarks="歌手名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="album_name"
+        </createTable>
+        <rollback>
+            <dropTable tableName="user_song_collection" />
+        </rollback>
+    </changeSet>
+    -->
+
+
+    <changeSet id="2016_07_22_add_table_mobileapp_pic" author="Fang Xu">
+        <createTable tableName="mobileapppic" remarks="APP启动图片">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="url" type="VARCHAR(100)" remarks="启动图片地址">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2016_08_05_add_table_feed" author="Fang Xu">
+        <sql dbms="mysql">
+            CREATE TABLE `v_feed` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `feed_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'feed_id',
+                `user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'foreign key ref to real_user(`id`)',
+                `content` varchar(2048) NOT NULL DEFAULT '' COMMENT '帖子实际内容',
+                `topic` varchar(128) NOT NULL DEFAULT '' COMMENT '话题',
+                `page_type` varchar(32) NOT NULL DEFAULT 'none' COMMENT 'page的类型，例如音乐，记步',
+                `page_content` varchar(2048) NOT NULL DEFAULT '{}' COMMENT 'page内容，建议用json格式',
+                `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_feed_list` (`feed_id`,`is_deleted`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate=utf8mb4_bin COMMENT='feed表';
+        </sql>
+        <sql dbms="mysql">
+            CREATE TABLE `v_feed_comments` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `comment_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '评论id',
+                `feed_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '评论的帖子id',
+                `user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '谁发了这条评论',
+                `reply_to_user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '这条评论回复给谁',
+                `comment_text` varchar(2048) COLLATE utf8mb4_bin NOT NULL COMMENT '评论内容',
+                `is_deleted` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_comment_id` (`comment_id`),
+                KEY `idx_list` (`feed_id`,`is_deleted`,`comment_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        </sql>
+        <sql dbms="mysql">
+            CREATE TABLE `v_feed_counts` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `feed_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '评论的帖子id',
+                `comment_count` int(11) NOT NULL DEFAULT '0' COMMENT '评论数',
+                `thumb_count` int(11) NOT NULL DEFAULT '0' COMMENT '赞数',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '时间',
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_feed_id` using hash (`feed_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        </sql>
+        <rollback>
+            <dropTable tableName="v_feed"/>
+            <dropTable tableName="v_comments"/>
+            <dropTable tableName="v_feed_counts"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="2016_07_25_add_sync_db_tables" author="TimWang" runInTransaction="true" dbms="mysql">
+        <sql dbms="mysql">
+            CREATE TABLE `client_user_data` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `real_user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'foreign key ref to real_user(`id`)',
+                `table_name` varchar(128) NOT NULL DEFAULT '' COMMENT '要同步的客户端表的名称',
+                `data_pk` varchar(255) NOT NULL DEFAULT '' COMMENT '表的主键，这个是解决冲突用的',
+                `data` text NOT NULL COMMENT '数据，最好是json格式的',
+                `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '1:数据已被删除',
+                `update_version` bigint(20) NOT NULL DEFAULT '0' COMMENT '更新版本号，每个user+table_type都有一个独立的序列',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_real_id_table_pk` (`real_user_id`,`table_name`,`data_pk`(60)),
+                KEY `idx_real_id_table_version` (`real_user_id`,`table_name`,`update_version`),
+                KEY `idx_get_list` (`real_user_id`,`table_name`,`is_delete`,`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate=utf8mb4_bin COMMENT='用户数据(客户端数据)';
+        </sql>
+        <sql dbms="mysql">
+            CREATE TABLE `client_user_data_version_seq` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `real_user_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'foreign key ref to real_user(`id`)',
+                `table_name` varchar(128) NOT NULL DEFAULT '' COMMENT '要同步的客户端表的名称',
+                `update_version` bigint(20) NOT NULL DEFAULT '0' COMMENT '更新版本号，每个user+table_type都有一个独立的序列',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_real_id_table` (`real_user_id`,`table_name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客户端数据库数据版本号';
+        </sql>
+        <rollback>
+            <dropTable tableName="client_user_data" />
+            <dropTable tableName="client_user_data_version_seq"/>
+        </rollback>
+    </changeSet>
+
+
+
+    <changeSet id="2016_08_03_add_user_attention_tables" author="Ma Yuchen">
+        <createTable tableName="v_attention" remarks="用户关注表">
+            <column autoIncrement="true" name="id" type="bigint(20) UNSIGNED" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint(20)" defaultValue="0" remarks="用户id或称关注人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attention_user_id" type="bigint(20)" defaultValue="0" remarks="被关注人id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_create" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_update" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="v_attention" columnNames="user_id,attention_user_id"
+                             constraintName="uniq_attentions"/>
+        <createIndex tableName="v_attention" indexName="idx_followers">
+            <column name="attention_user_id" />
+            <column name="user_id" />
+        </createIndex>
+
+        <createTable tableName="v_user_counts" remarks="用户计数">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint(20)" defaultValue="0" remarks="用户id">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="feed_count" type="int(11)" defaultValue="0" remarks="动态数">
+                <constraints nullable="false" />
+            </column>
+            <column name="follower_count" type="int(11)" defaultValue="0" remarks="粉丝数">
+                <constraints nullable="false" />
+            </column>
+            <column name="attentioner_count" type="int(11)" defaultValue="0" remarks="关注数">
+                <constraints nullable="false" />
+            </column>
+            <column name="collection_count" type="int(11)" defaultValue="0" remarks="收藏数">
+                <constraints nullable="false" />
+            </column>
+            <column name="message_unread_count" type="int(11)" defaultValue="0" remarks="未读消息数">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_create" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_update" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="real_user_settings" remarks="用户个人设置">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="real_user_id" type="BIGINT UNSIGNED" defaultValueNumeric="0"
+                    remarks="foreign key ref to real_user(`id`)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="collect_to_share" type="tinyint(1)" defaultValue="0" remarks="收藏成功分享到V圈">
+                <constraints nullable="false" />
+            </column>
+            <column name="sports_to_share" type="tinyint(1)" defaultValue="0" remarks="运动结束分享到V圈">
+                <constraints nullable="false" />
+            </column>
+            <column name="comment_to_share" type="tinyint(1)" defaultValue="0" remarks="评论内容分享到V圈">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_create" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_update" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="2016_08_11_add_user_MessageBox_tables" author="Ma Yuchen">
+        <sql dbms="mysql">
+            CREATE TABLE `v_message_box` (
+                `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `message_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT '消息uid',
+                `user_from_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '来源用户id',
+                `user_to_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '目的用户id',
+                `comments_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '对应评论,私信id',
+                `message_type` varchar(16) NOT NULL DEFAULT 'none' COMMENT 'message的类型，例如帖子 私信或者@自己之类的',
+                `message_body` varchar(1024) NOT NULL DEFAULT '{}' COMMENT 'message的规范内容,用json表示',
+                `content` varchar(2048) NOT NULL DEFAULT '' COMMENT 'message内容,',
+                `is_read` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否已阅读,默认未读',
+                `dt_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `dt_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_msg_id` (`user_to_id`,`message_uid`),
+                INDEX `idx_list` (`user_to_id`,`message_type`,`message_uid` DESC)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 collate=utf8mb4_bin COMMENT '用户消息箱表';
+        </sql>
+        <rollback>
+            <dropTable tableName="v_message_box"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2016_08_26_add_discovery_tables" author="Fang Xu">
+        <createTable tableName="d_channel">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="channel_id" type="bigint(20)" remarks="电台id">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="channel_name" type="VARCHAR(64)" remarks="电台名字">
+                <constraints nullable="false" />
+            </column>
+            <column name="channel_img" type="VARCHAR(128)"  defaultValue="" remarks="电台头像">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="d_channel_album">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="channel_id" type="bigint(20)" remarks="电台id">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_id" type="bigint(20)" remarks="专辑id">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="d_category">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="category_id" type="bigint(20)" remarks="分类id">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="category_name" type="VARCHAR(64)" remarks="分类名称">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="d_album_song_list">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="category_id" type="bigint(20)" remarks="分类id">
+                <constraints nullable="false" />
+            </column>
+            <column name="type" type="VARCHAR(64)" remarks="分类列表类型：歌单为album，歌曲为song">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_song_list_id" type="bigint(20)" remarks="歌单或歌曲列表id">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_song_list_name" type="VARCHAR(64)" remarks="歌单或歌曲列表名称">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="d_album_song">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="album_song_list_id" type="bigint(20)" remarks="歌单或歌曲列表id,对应d_album_song_list表中album_song_list_id字段">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_song_id" type="bigint(20)" remarks="专辑或歌曲id">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="d_music_album">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="album_id" type="bigint(20)" remarks="专辑id">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="album_name" type="VARCHAR(64)" remarks="专辑名称">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_logo" type="VARCHAR(128)" defaultValue="" remarks="专辑封面">
+                <constraints nullable="false" />
+            </column>
+            <column name="artist_id" type="bigint(20)" remarks="歌手id">
+                <constraints nullable="false" />
+            </column>
+            <column name="artist_name" type="VARCHAR(64)" defaultValue="" remarks="歌手名字">
+                <constraints nullable="false" />
+            </column>
+            <column name="artist_logo" type="VARCHAR(128)" defaultValue="" remarks="歌手头像">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="varchar(2048)" remarks="专辑描述">
+                <constraints nullable="false" />
+            </column>
+            <column name="song_count" type="int(11)" defaultValue="0" remarks="歌曲数量">
+                <constraints nullable="false" />
+            </column>
+            <column name="company" type="VARCHAR(64)" defaultValue="" remarks="公司名称">
+                <constraints nullable="false" />
+            </column>
+            <column name="play_counts" type="bigint(20)" defaultValue="0" remarks="播放次数">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_create" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="d_music_song">
+            <column autoIncrement="true" name="id" type="bigint(20)" startWith="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="song_id" type="bigint(20)" remarks="歌曲id">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="song_type" type="VARCHAR(64)" defaultValue="" remarks="歌曲来源,如：xiami">
+                <constraints nullable="false" />
+            </column>
+            <column name="song_name" type="VARCHAR(64)" remarks="歌曲名字">
+            <constraints nullable="false" />
+            </column>
+            <column name="artist" type="VARCHAR(64)" defaultValue="" remarks="演唱者">
+                <constraints nullable="false" />
+            </column>
+            <column name="artist_id" type="int(11)" defaultValue="0" remarks="演唱者id">
+                <constraints nullable="false" />
+            </column>
+            <column name="artist_logo" type="VARCHAR(128)" defaultValue="" remarks="演唱者头像">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_name" type="VARCHAR(64)" defaultValue="" remarks="专辑名字">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_id" type="bigint(20)" defaultValue="0" remarks="专辑id">
+                <constraints nullable="false" />
+            </column>
+            <column name="album_logo" type="VARCHAR(128)" defaultValue="" remarks="专辑封面">
+                <constraints nullable="false" />
+            </column>
+            <column name="listen_file" type="VARCHAR(128)" defaultValue="" remarks="歌曲文件">
+                <constraints nullable="false" />
+            </column>
+            <column name="lyric_file" type="VARCHAR(128)" defaultValue="" remarks="歌词文件">
+                <constraints nullable="false" />
+            </column>
+            <column name="singers" type="VARCHAR(64)" defaultValue="" remarks="歌手">
+                <constraints nullable="false" />
+            </column>
+            <column name="play_counts" type="bigint(20)" defaultValue="0" remarks="播放次数">
+                <constraints nullable="false" />
+            </column>
+            <column name="introduction" type="VARCHAR(128)" defaultValue="" remarks="歌曲介绍，供前台展示用">
+                <constraints nullable="false" />
+            </column>
+            <column name="dt_create" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP" remarks="时间">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2016_10_20_add_user_favorite_music_tables" author="ming jie">
+        <sql dbms="mysql"><!-- 用户收藏音乐信息表 -->
+            create table `user_favorite_music` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `user_id` bigint(20) UNSIGNED NOT NULL,
+            `artist` varchar(64) NOT NULL,
+            `artist_id` varchar(64) NOT NULL,
+            `artist_subtitle` varchar(64) NOT NULL default '',
+            `album_id` varchar(64) NOT NULL,
+            `album_logo` varchar(255) NOT NULL default '',
+            `album_name` varchar(64) NOT NULL,
+            `album_subtitle` varchar(64) NOT NULL default '',
+            `music_id` varchar(64) NOT NULL,
+            `play_seconds` int(11) NOT NULL,
+            `song_name` varchar(64) NOT NULL,
+            `song_subtitle` varchar(64) NOT NULL default '',
+            `last_favorite_time` bigint(20) NOT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE Index `uniq_favorite_music`(`user_id`,`artist_id`,`album_id`,`music_id`)
+            )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+        </sql>
+        <rollback>
+            <dropTable tableName="user_favorite_music" />
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

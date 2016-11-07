@@ -12,7 +12,7 @@ import org.springframework.core.env.Environment;
  * 客户端推送的配置
  * Created by tim@vinci on 16/7/25.
  */
-@Configuration
+//@Configuration
 public class MobileMsgPushConfiguration {
     @Configuration
     @Profile(UserProfile.INTG)
