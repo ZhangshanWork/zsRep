@@ -1,6 +1,6 @@
 package im.vinci.server.naturelang.domain;
 
-public class Response_guide {
+public class GuideResponse {
 	private int rc;
 	private String text;
 	private String rtext;

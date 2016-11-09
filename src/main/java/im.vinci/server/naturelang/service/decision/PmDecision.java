@@ -1,11 +1,11 @@
 package im.vinci.server.naturelang.service.decision;
 
+import im.vinci.server.naturelang.domain.ServiceRet;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import im.vinci.server.naturelang.domain.ServiceRet;
-
-public class PM_check {
+public class PmDecision {
 	public ServiceRet pm_check(String msg){
 		msg = msg.toLowerCase();
 		ServiceRet sr = new ServiceRet();

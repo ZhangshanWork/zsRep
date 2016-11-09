@@ -3,10 +3,10 @@ package im.vinci.server.naturelang.service.impl;
 import im.vinci.server.naturelang.domain.ServiceRet;
 import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.service.DispatcherService;
-import im.vinci.server.naturelang.service.decision.Clock_check;
-import im.vinci.server.naturelang.service.decision.PM_check;
-import im.vinci.server.naturelang.service.decision.Record_check;
-import im.vinci.server.naturelang.service.decision.Weather_check;
+import im.vinci.server.naturelang.service.decision.ClockDecision;
+import im.vinci.server.naturelang.service.decision.PmDecision;
+import im.vinci.server.naturelang.service.decision.RecordDecision;
+import im.vinci.server.naturelang.service.decision.WeatherDecision;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,22 +34,22 @@ public class DispatcherServiceImpl implements DispatcherService {
         }
 
         //录音服务判定
-        serviceRet = new Record_check().record_check(query);
+        serviceRet = new RecordDecision().record_check(query);
         if(StringUtils.isNotBlank(serviceRet.getService())){
             return serviceRet;
         }
         //空气质量服务判定
-        serviceRet = new PM_check().pm_check(query);
+        serviceRet = new PmDecision().pm_check(query);
         if(StringUtils.isNotBlank(serviceRet.getService())){
             return serviceRet;
         }
         //天气服务判定
-        serviceRet = new Weather_check().weather_check(query);
+        serviceRet = new WeatherDecision().weather_check(query);
         if(StringUtils.isNotBlank(serviceRet.getService())){
             return serviceRet;
         }
         //录音服务判定
-        serviceRet = new Clock_check().service_check(query);
+        serviceRet = new ClockDecision().service_check(query);
         if(StringUtils.isNotBlank(serviceRet.getService())){
             return serviceRet;
         }

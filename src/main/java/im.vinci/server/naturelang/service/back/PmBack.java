@@ -2,36 +2,27 @@ package im.vinci.server.naturelang.service.back;
 
 
 
+import com.iflytek.cloud.speech.*;
+import im.vinci.server.naturelang.domain.Parameter;
+import im.vinci.server.naturelang.domain.PMResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
-import im.vinci.server.naturelang.domain.Parameter;
-import im.vinci.server.naturelang.domain.Response_PM;
-
-import org.json.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
-import com.iflytek.cloud.speech.SpeechError;
-import com.iflytek.cloud.speech.SpeechUtility;
-import com.iflytek.cloud.speech.TextUnderstander;
-import com.iflytek.cloud.speech.TextUnderstanderListener;
-import com.iflytek.cloud.speech.UnderstanderResult;
-
-public class PM_get {
+public class PmBack {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	public PM_get(){
+	public PmBack(){
 		init();
 	}
 	private final String APPID = "5682479d";
@@ -39,10 +30,10 @@ public class PM_get {
 		SpeechUtility.createUtility("appid=" + APPID);
 	}
 
-	public Response_PM get_PM(Parameter parameter){
+	public PMResponse getPM(Parameter parameter){
 		log.info("weather get service");
 		JSONObject temp_result = new JSONObject();
-		Response_PM response = new Response_PM();
+		PMResponse response = new PMResponse();
 		String result = "";
 		try {
 			if(parameter==null){

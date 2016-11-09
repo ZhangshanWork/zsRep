@@ -1,6 +1,6 @@
 package im.vinci.server.naturelang.domain;
 
-public class Xunfei_guide_result {
+public class XunfeiGuideResult {
 	private String startLoc;
 	private String endLoc;
 	private String startPOI;

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import im.vinci.server.naturelang.domain.Parameter;
 import im.vinci.server.naturelang.domain.Response;
-import im.vinci.server.naturelang.service.decision.Clock_check;
+import im.vinci.server.naturelang.service.decision.ClockDecision;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.core.io.ClassPathResource;
@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 import static com.cronutils.model.field.expression.FieldExpressionFactory.*;
 
-public class SetClock {
+public class ClockBack {
     private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>(),
             day_list=new Hashtable<String,Integer>(),
             time_list=new Hashtable<String,Integer>(),
@@ -41,11 +41,11 @@ public class SetClock {
     private String[] time=new String[6]; //store the crontab time information(minute,hour,day,month,week,year)
     public int tomorrow=0,dialogue_time=0;
     private int[] advance = {0,0};
-    public SetClock(Parameter parameter){
+    public ClockBack(Parameter parameter){
         //log.info("set clock service");
         //log.info("the message is "+msg);
         initial();
-        pre_analyse(parameter);
+        preAnalyse(parameter);
     }
     private void initial(){
         this.number_list.put("零", 0);
@@ -80,7 +80,7 @@ public class SetClock {
     }
 
     //预处理
-    private void pre_analyse(Parameter parameter){
+    private void preAnalyse(Parameter parameter){
         if(parameter.equals(null)||parameter.getQuery()==null||parameter.getQuery().equals("")){
             response.setRc(4);
             response.setRtext("输入为空");
@@ -102,22 +102,22 @@ public class SetClock {
         }
 
         this.response.setText(msg);
-        this.msg = instead_week(msg);
-        this.msg = number_exchange(this.msg);
+        this.msg = insteadWeek(msg);
+        this.msg = numberExchange(this.msg);
         this.message = msg;
         //check if he want to search clock
-        Clock_check cc = new Clock_check();
+        ClockDecision cc = new ClockDecision();
         String operation = cc.service_check(this.msg).getOperation();
         if(operation.equals("VIEW")){
             this.response.setOperation("VIEW");
-            select_query(this.msg);
+            selectQuery(this.msg);
             return;
         }
         //check if he want to delete clock
         for(int i=0;i<this.delete_list.length;i++){
             if( this.msg.contains(this.delete_list[i])){
                 this.response.setOperation("DELETE");
-                select_query(this.msg);
+                selectQuery(this.msg);
                 return;
             }
         }
@@ -125,7 +125,7 @@ public class SetClock {
         for(int i=0;i<this.concentrate_lsit.length;i++){
             if( this.msg.contains(this.concentrate_lsit[i])){
                 this.response.setOperation("CONCENTRATE");
-                int time = get_after_time(this.msg);
+                int time = getAfterTime(this.msg);
                 if(time>0){
                     dt = dt.plusHours(time/60);
                     dt = dt.plusMinutes(time%60);
@@ -134,14 +134,14 @@ public class SetClock {
                     dt = dt.plusMinutes(30);
                     time=30;
                 }
-                result_write();
+                resultWrite();
                 return;
             }
         }
         //check it is fix time or not
         for(int i=0;i<this.fix_list.length;i++){
             if( this.msg.contains(this.fix_list[i])){
-                int time = get_after_time(this.msg);
+                int time = getAfterTime(this.msg);
                 if(time>0){
                     dt = dt.plusHours(time/60);
                     dt = dt.plusMinutes(time%60);
@@ -150,7 +150,7 @@ public class SetClock {
                     dt = dt.plusMinutes(30);
                 }
                 this.response.setOperation("CREATE");
-                result_write();
+                resultWrite();
                 return;
             }
         }
@@ -158,7 +158,7 @@ public class SetClock {
         set_clock(this.msg);
     }
     //instead the different type of weekday to zhou type
-    private String instead_week(String msg){
+    private String insteadWeek(String msg){
         StringBuffer sb = new StringBuffer(msg);
         Pattern p = Pattern.compile("个*周|个*礼拜|个*星期");
         Matcher m = p.matcher(msg);
@@ -169,7 +169,7 @@ public class SetClock {
         return msg;
     }
     //change the chinese number to 1,2,3..
-    private String number_exchange(String msg){
+    private String numberExchange(String msg){
         int number = 0;
         if(msg.contains("今晚")){
             msg = msg.replace("今晚", "今天晚上");
@@ -239,17 +239,17 @@ public class SetClock {
     private  void  set_clock(String  msg){
 //this.a.setType("alert.set");
         this.response.setOperation("CREATE");
-        check_festival(this.msg);
+        checkFestival(this.msg);
         int  number=0;
 //check  if  he  want  set  after  clock
         number=check_after(this.msg);
         if(number>0){
             String  str  =  this.msg.substring(((number-10)<0?0:number-10),number);
-            int  time  =  get_after_time(str);
+            int  time  =  getAfterTime(str);
             if(time>0){
                 dt  =  dt.plusHours(time/60);
                 dt  =  dt.plusMinutes(time%60);
-                result_write();
+                resultWrite();
                 return;
             }
             else{
@@ -290,16 +290,16 @@ public class SetClock {
                         }
                     }
                 }
-                int[]  hour  =  get_hour(msg);
+                int[]  hour  =  getHour(msg);
                 if(hour[1]>0  ||  hour[2]>0){
                     this.dt  =  new  DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-                    last_check(hour);
-                    result_write();
+                    lastCheck(hour);
+                    resultWrite();
                     return;
                 }
                 else{
                     this.response.setRtext("请问什么时候");
-                    result_write();
+                    resultWrite();
                     return;
                 }
             }
@@ -309,14 +309,14 @@ public class SetClock {
             Pattern  p  =  Pattern.compile("提前");
             Matcher  m  =  p.matcher(msg);
             if(m.find()){
-                int  times  =  get_after_time(msg.substring(m.start(),m.end()+7));
+                int  times  =  getAfterTime(msg.substring(m.start(),m.end()+7));
                 if(times>0){
                     advance[0]=times/60;
                     advance[1]=times%60;
                 }
             }
         }
-        if(check_regular(msg)){
+        if(checkRegular(msg)){
             boolean  duration  =  false;
             Pattern  p  =  Pattern.compile("每隔*\\d{1,2}天");
             Matcher  m  =  p.matcher(msg);
@@ -380,24 +380,24 @@ public class SetClock {
                     }
                 }
             }
-            int[] hour = get_hour(msg);
+            int[] hour = getHour(msg);
             if(hour[1]>0 || hour[2]>0){
                 this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-                last_check(hour);
-                result_write();
+                lastCheck(hour);
+                resultWrite();
                 return;
             }
             else if(!duration){
                 this.response.setRtext("请问什么时候");
-                result_write();
+                resultWrite();
                 return;
             }
             else{
-                result_write();
+                resultWrite();
                 return;
             }
         }
-        int day=get_week(msg);
+        int day= getWeek(msg);
         if(day>0){
             String replace = "周"+day;
             if(msg.contains("下下周")){
@@ -413,23 +413,23 @@ public class SetClock {
             if(day<this.dt.getDayOfWeek()){//(day<now_day){
                 this.response.setOperation("FAILED");
                 this.response.setRtext("本周已经没有了");
-                result_write();
+                resultWrite();
                 return;
             }
             else{
                 this.dt = this.dt.plusDays(day-this.dt.getDayOfWeek());
             }
             msg = msg.replace(replace,  " ");
-            int[] hour=get_hour(msg);
+            int[] hour= getHour(msg);
             if(hour[1]>0 || hour[2]>0){
                 this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-                last_check(hour);
-                result_write();
+                lastCheck(hour);
+                resultWrite();
                 return;
             }
             else{
                 this.response.setRtext("请问几点");
-                result_write();
+                resultWrite();
                 return;
             }
         }
@@ -445,26 +445,26 @@ public class SetClock {
                 }
             }
         }
-        int[] hour = get_hour(this.msg);
+        int[] hour = getHour(this.msg);
         if(true){
             if(hour[1]>0 || hour[2]>0){
                 this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1]%24,hour[2]);
                 if(hour[1]>23){
                     this.dt = this.dt.plusDays(1);
                 }
-                last_check(hour);
-                result_write();
+                lastCheck(hour);
+                resultWrite();
                 return;
             }
             else{
                 this.response.setRtext("请问几点");
-                result_write();
+                resultWrite();
                 return;
             }
         }
     }
     //check if it contain festival
-    private void check_festival(String msg){
+    private void checkFestival(String msg){
         msg = msg.replace("大年30", "除夕");
         msg = msg.replace("大年初1", "春节");
         msg = msg.replace("正月15", "元宵节");
@@ -538,7 +538,7 @@ public class SetClock {
             }
             Scanner in = new Scanner(System.in);
             answer = in.nextLine();
-            answer = number_exchange(answer);
+            answer = numberExchange(answer);
             this.message+=answer;
             answer=this.msg+" "+answer;
             this.msg = answer;
@@ -548,7 +548,7 @@ public class SetClock {
 
     }
     //check if contain regular keywords
-    private boolean check_regular(String msg){
+    private boolean checkRegular(String msg){
         Pattern p = Pattern.compile("每隔*(周|\\d{0,2}天|\\d个月)|周末|工作日|(每个*月)");
         Matcher m = p.matcher(msg);
         if(m.find()){
@@ -558,7 +558,7 @@ public class SetClock {
         return false;
     }
     //get the day of the week
-    private int get_week(String msg){
+    private int getWeek(String msg){
     int day=0;
         Pattern p = Pattern.compile("周\\d");
         Matcher m = p.matcher(msg);
@@ -568,7 +568,7 @@ public class SetClock {
         return day;
     }
     //get the hour in the message
-    private int[] get_hour(String msg){
+    private int[] getHour(String msg){
         //hour[0]:if there two time;hour[1]:the hour number;hour[2]:the minute number
         int[] hour=new int[5];
         int i=0;
@@ -669,7 +669,7 @@ public class SetClock {
         }
         return length;
     }
-    private int get_after_time(String msg){
+    private int getAfterTime(String msg){
         //System.out.println(msg);
         int number=0;
         Pattern p = Pattern.compile("\\d{1,2}个半小时");
@@ -837,7 +837,7 @@ public class SetClock {
         }
         return month;
     }
-    private void last_check(int[] hour){
+    private void lastCheck(int[] hour){
         DateTime dat = new DateTime();
         if((new DateTime(dat.getYear(),dat.getMonthOfYear(),dat.getDayOfMonth(),0,0)).compareTo(new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),0,0))>0){
             this.response.setOperation("FAILED");
@@ -913,7 +913,7 @@ public class SetClock {
             this.dt = this.dt.plusMinutes(0-advance[1]);
         }
     }
-    private void result_write(){
+    private void resultWrite(){
         FieldExpression year = questionMark();
         FieldExpression week = questionMark();
         FieldExpression month = questionMark();
@@ -985,7 +985,7 @@ public class SetClock {
         this.response.getSemantic().getSlots().getDatetime().setTime(cron.asString());
         String message = "";
         if(!this.message.equals(null)|| !this.message.equals("")){
-            message = get_message(this.message.trim());
+            message = getMessage(this.message.trim());
         }
         Pattern p = Pattern.compile("有\\S{1,2}个");
         Matcher m = p.matcher(this.msg);
@@ -1010,7 +1010,7 @@ public class SetClock {
         }
     }
     //get the message
-    private String get_message(String msg){
+    private String getMessage(String msg){
         String message = "";
         Pattern p = Pattern.compile("\\d{1,2}点钟*");
         Matcher m = p.matcher(msg);
@@ -1055,7 +1055,7 @@ public class SetClock {
     }
 
     //deal the select query
-    private void select_query(String msg){
+    private void selectQuery(String msg){
         Pattern p = Pattern.compile("(下1(次|个))|(最近1(个|次))|(刚刚)|(刚才)|(上\\S{0,1})(个|条)");
         Matcher m = p.matcher(msg);
         if(m.find()){
@@ -1064,7 +1064,7 @@ public class SetClock {
             return;
 
         }
-        int day=get_week(msg);
+        int day= getWeek(msg);
         if(day>0){
             String replace = "周"+day;
             if(msg.contains("下下周")){
@@ -1083,7 +1083,7 @@ public class SetClock {
                 this.dt = this.dt.plusDays(day-this.dt.getDayOfWeek());
             }
             msg = msg.replace(replace, "");
-            int[] hour=get_hour(msg);
+            int[] hour= getHour(msg);
             if(hour[0]>0){
                 this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
                 DateTime d = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[3],hour[4]);
@@ -1094,12 +1094,12 @@ public class SetClock {
                 if(m.find()){
                     response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1))-48);
                 }
-                result_write();
+                resultWrite();
             }
             else{
-                hour = check_select_time(hour);
+                hour = checkSelectTime(hour);
                 if(hour[0]==-1){
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 if(hour[1]>0&&hour[2]>0){
@@ -1116,7 +1116,7 @@ public class SetClock {
                     else{
                         this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
                     }
-                    result_write();
+                    resultWrite();
 
                 }
                 else if(hour[1]>0){
@@ -1140,7 +1140,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                 }
                 else if(msg.contains("早上")||msg.contains("上午")){
                     this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),0,0);
@@ -1150,7 +1150,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else if(msg.contains("下午")||msg.contains("晚上")){
@@ -1161,7 +1161,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else{
@@ -1172,7 +1172,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
             }
@@ -1193,7 +1193,7 @@ public class SetClock {
                 }
             }
         }
-        int[] hour = get_hour(this.msg);
+        int[] hour = getHour(this.msg);
         if(hour[0]>0){
             this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
             DateTime d = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[3],hour[4]);
@@ -1214,13 +1214,13 @@ public class SetClock {
             if(m.find()){
                 response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
             }
-            result_write();
+            resultWrite();
             return;
         }
         else{
-            hour = check_select_time(hour);
+            hour = checkSelectTime(hour);
             if(hour[0]==-1){
-                result_write();
+                resultWrite();
                 return;
             }
             if(hour[1]>0&&hour[2]>0){
@@ -1241,7 +1241,7 @@ public class SetClock {
                 if(m.find()){
                     response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                 }
-                result_write();
+                resultWrite();
                 return;
             }
             else if(hour[1]>0){
@@ -1264,7 +1264,7 @@ public class SetClock {
                 if(m.find()){
                     response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                 }
-                result_write();
+                resultWrite();
                 return;
             }
             else if(day_change>0){
@@ -1276,7 +1276,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else if(msg.contains("下午")||msg.contains("晚上")){
@@ -1287,7 +1287,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else{
@@ -1300,7 +1300,7 @@ public class SetClock {
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                         //this.a.getData().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
             }
@@ -1313,7 +1313,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else if(msg.contains("下午")||msg.contains("晚上")){
@@ -1324,7 +1324,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
                 else{
@@ -1335,7 +1335,7 @@ public class SetClock {
                     if(m.find()){
                         response.getSemantic().getSlots().getDatetime().setIndex(Integer.valueOf(msg.charAt(m.start()+1)-48));
                     }
-                    result_write();
+                    resultWrite();
                     return;
                 }
             }
@@ -1349,11 +1349,11 @@ public class SetClock {
         else{
             response.getSemantic().getSlots().getDatetime().setIndex(-1);
         }
-        result_write();
+        resultWrite();
         return;
     }
     //check the select time
-    private int[] check_select_time(int[] hour){
+    private int[] checkSelectTime(int[] hour){
         if(msg.contains("早上") || msg.contains("上午") || msg.contains("凌晨")){
             if(msg.contains("早上")){
                 String dateorig = "早上"+this.response.getSemantic().getSlots().getDatetime().getTimeOrig();

@@ -1,19 +1,16 @@
 package im.vinci.server.naturelang.service.decision;
 
-import java.util.Hashtable;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import im.vinci.server.naturelang.domain.ServiceRet;
 import org.ansj.domain.Result;
 import org.ansj.splitWord.analysis.ToAnalysis;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import im.vinci.server.naturelang.domain.ServiceRet;
+import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Weather_check {
+public class WeatherDecision {
 	private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>();
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	public ServiceRet weather_check(String msg){

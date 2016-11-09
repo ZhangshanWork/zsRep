@@ -1,8 +1,6 @@
 package im.vinci.server.naturelang.domain;
 
-import im.vinci.server.naturelang.domain.Response_location;
-
-public class Response_PM {
+public class PMResponse {
 	private int rc;
 	private String text;
 	private String rtext;
@@ -10,7 +8,7 @@ public class Response_PM {
 	private String operation;
 	private Semantic semantic = new Semantic();
 	public class Semantic{
-		private Response_location location = new Response_location();
+		private LocationResponse location = new LocationResponse();
 		private Slots slots = new Slots();
 		public class Slots{
 			private String sourceName;
@@ -77,10 +75,10 @@ public class Response_PM {
 				this.area = area;
 			}
 		}
-		public Response_location getLocation() {
+		public LocationResponse getLocation() {
 			return location;
 		}
-		public void setLocation(Response_location location) {
+		public void setLocation(LocationResponse location) {
 			this.location = location;
 		}
 		public Slots getSlots() {

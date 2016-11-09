@@ -1,51 +1,41 @@
 package im.vinci.server.naturelang.service.back;
 
 import im.vinci.server.naturelang.domain.Parameter;
-import im.vinci.server.naturelang.domain.Response_record;
+import im.vinci.server.naturelang.domain.RecordResponse;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Select_record {
+/**
+ * 录音处理
+ */
+public class RecordBack {
 	private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>();
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	private String oriDate = "";
-	public Response_record select_record(Parameter parameter){
-		//JSONObject result = new JSONObject();
-		//log.info("record get service");
-		Response_record response = new Response_record();
+
+	public RecordResponse selectRecord(Parameter parameter){
+		RecordResponse response = new RecordResponse();
 		try {
 			if(parameter.getQuery().equals(null) || parameter.getQuery().equals("")){
 				response.setRc(4);
 				response.setText(parameter.getQuery());
 				response.setRtext("输入是空");
 				return response;
-				/*result.put("rc", 4);
-				result.put("text", "");
-				result.put("rtext", "输入是空");
-				//log.info("message is null");
-				return result.toString();*/
 			}
-			//JSONObject json = new JSONObject(msg);
 			String query = parameter.getQuery();//json.getString("query");
-			//log.info("record service query is:"+query);
 			response.setText(query);
 			response.setRtext("");
 			response.setService("record");
 			response.setOperation("query");
-			/*result.put("text", query);
-			result.put("rtext", "");
-			result.put("service", "record");
-			result.put("operation", "query");*/
-			//JSONObject semantic = new JSONObject();
-			query = number_exchange(query);
-			int[] month = time_get(query);
+			query = numberExchange(query);
+			int[] month = timeGet(query);
 			DateTime dt = new DateTime();
 			DateTime dat = new DateTime(dt.getYear(),dt.getMonthOfYear(),dt.getDayOfMonth(),0,0);
 			if(month[1]>0||month[2]>0){
@@ -58,86 +48,49 @@ public class Select_record {
 						dt = dt.plusYears(-1);
 					}
 				}
-				//System.out.println(dt.toString());
-				//JSONObject slots = new JSONObject();
 				SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 				Date d = dt.toDate();
 				response.setRc(0);
 				response.getSemantic().getSlots().setDatetime(sf.format(d));
 				response.getSemantic().getSlots().setDateOrig(oriDate);
 				response.getSemantic().getSlots().setType("all");
-				/*slots.put("datetime", sf.format(d));
-				slots.put("DateOrig", oriDate);
-				slots.put("type", "all");
-				slots.put("name", "");
-				//slots.put("rc", 0);
-				semantic.put("slots", slots);*/
-			}
-			else{
+			} else {
 				Pattern p = Pattern.compile("(最(新|近))|(刚(才|刚))|(上1?(个|条|次))");
 				Matcher m = p.matcher(query);
-				if(m.find()){
-					//System.out.println("播放最新录音");
-					//JSONObject slots = new JSONObject();
+				if (m.find()) {
 					response.setRc(0);
 					response.getSemantic().getSlots().setDatetime("");
 					response.getSemantic().getSlots().setDateOrig(oriDate);
 					response.getSemantic().getSlots().setName("");
 					response.getSemantic().getSlots().setType("last");
-					/*slots.put("datetime", "");
-					slots.put("DateOrig", oriDate);
-					slots.put("type", "last");
-					slots.put("name", "");
-					//slots.put("rc", 0);
-					semantic.put("slots", slots);*/
-				}
-				else{
-					p = Pattern.compile("录音\\d{9,11}");
+				} else {
+					p = Pattern.compile("录音\\d{7,9}");
 					m = p.matcher(query);
-					if(m.find()){
-						//System.out.println("播放："+query.substring(m.start(),m.end()));
-						//JSONObject slots = new JSONObject();
+					if (m.find()) {
 						response.setRc(0);
 						response.getSemantic().getSlots().setDatetime("");
 						response.getSemantic().getSlots().setDateOrig(oriDate);
 						response.getSemantic().getSlots().setType("special");
-						response.getSemantic().getSlots().setName(query.substring(m.start(),m.end()));
-						/*slots.put("datetime", "");
-						slots.put("DateOrig", oriDate);
-						slots.put("type", "special");
-						slots.put("name", query.substring(m.start(),m.end()));
-						//slots.put("rc", 0);
-						semantic.put("slots", slots);*/
-					}
-					else{
-						//System.out.println("播放所有");
-						//JSONObject slots = new JSONObject();
+						response.getSemantic().getSlots().setName(query.substring(m.start(), m.end()));
+					} else {
 						response.setRc(0);
 						response.getSemantic().getSlots().setDatetime("");
 						response.getSemantic().getSlots().setDateOrig(oriDate);
 						response.getSemantic().getSlots().setType("all");
 						response.getSemantic().getSlots().setName("");
-						/*slots.put("datetime", "");
-						slots.put("DateOrig", oriDate);
-						slots.put("type", "all");
-						slots.put("name", "");
-						slots.put("rc", 0);
-						semantic.put("slots", slots);*/
 					}
 				}
 			}
-			//result.put("semantic", semantic);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			response.getSemantic().getSlots().setType("wrong");
-			//e.printStackTrace();
 			log.info(e.getMessage());
+			throw e;
 		}
-		//log.info("result is:"+result.toString());
 		return response;
-		//return result.toString();
 	}
-	public int[] time_get(String msg){
+
+	public int[] timeGet(String msg){
 		int[] month = new int[3];//year-month-day
 		Pattern p = Pattern.compile("\\d{1,2}月\\d{1,2}(日|号)");
 		Matcher m = p.matcher(msg);
@@ -163,12 +116,10 @@ public class Select_record {
 			else{
 				p = Pattern.compile("上个+月");
 				m = p.matcher(msg);
-				//System.out.println(month[0]+"?"+month[1]);
 				if(m.find()){
 					this.oriDate = msg.substring(m.start(),m.end());
 					month[0]=(new DateTime()).plusMonths(-1).getYear();
 					month[1]=(new DateTime()).plusMonths(-1).getMonthOfYear();
-					//System.out.println(month[0]+"?"+month[1]);
 				}
 			}
 			p = Pattern.compile("月*\\d{1,2}(日|号)");
@@ -211,7 +162,7 @@ public class Select_record {
 		return month;
 	}
 
-	private String number_exchange(String msg){
+	private String numberExchange(String msg){
 		this.number_list.put("零", 0);
 		this.number_list.put("一", 1);
 		this.number_list.put("二", 2);

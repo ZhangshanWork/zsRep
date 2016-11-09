@@ -1,6 +1,6 @@
 package im.vinci.server.naturelang.domain;
 
-public class Response_weather {
+public class WeatherResponse {
 	private int rc;
 	private String text;
 	private String rtext;
@@ -8,7 +8,7 @@ public class Response_weather {
 	private String operation;
 	private Semantic semantic = new Semantic();
 	public class Semantic{
-		private Response_location location = new Response_location();
+		private LocationResponse location = new LocationResponse();
 		private Datetime datetime = new Datetime();
 		private Slots slots = new Slots();
 		public class Datetime{
@@ -106,10 +106,10 @@ public class Response_weather {
 				this.tempRange = tempRange;
 			}
 		}
-		public Response_location getLocation() {
+		public LocationResponse getLocation() {
 			return location;
 		}
-		public void setLocation(Response_location location) {
+		public void setLocation(LocationResponse location) {
 			this.location = location;
 		}
 		public Datetime getDatetime() {
