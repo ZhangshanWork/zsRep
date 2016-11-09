@@ -162,6 +162,7 @@ public class Context {
      */
     public static List<MusicSong> getWhiteNoise() {
         List<MusicSong> ossMusicSong = ossMusics.get("whitenoise").getMusics();
+        Collections.shuffle(ossMusicSong);
         return ossMusicSong;
     }
 
