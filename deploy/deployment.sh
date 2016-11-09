@@ -26,7 +26,7 @@ if [ ! -z "$processId" ]; then
     kill -9 $processId
 fi
 
-VINCI_SERVER_STARTUP_LOG=/var/log/vinci/vinci_server.log
+VINCI_SERVER_STARTUP_LOG=/var/log/nlp/vinci_server.log
 echo "Starting server"
 echo "java_home is ${JAVA_HOME}"
 nohup ${JAVA_HOME}/bin/java -jar -Dspring.profiles.active=${VINCI_ENV} /opt/develop/vinci/vinci-server/build/libs/vinci_server-${PROJECT_VERSION}.jar -XX:+PrintGCDetails \

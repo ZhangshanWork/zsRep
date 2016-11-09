@@ -1,28 +1,10 @@
 package im.vinci.server.naturelang.musicpick.pick;
 
-import com.hankcs.hanlp.HanLP;
-import im.vinci.server.naturelang.musicpick.util.LCSdistance;
-import im.vinci.server.naturelang.musicpick.util.SortMapByValue;
-import im.vinci.server.naturelang.service.impl.NatureLangServiceImpl;
-import im.vinci.server.search.domain.music.MusicSong;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Service
 public class PickElementService{
-	 private  final ArrayList<String> firstPersonNoun = loadFile("nlp/pick/prefix");
+	 /*private  final ArrayList<String> firstPersonNoun = loadFile("nlp/pick/prefix");
 	 private  final ArrayList<String> postfix = loadFile("nlp/pick/postfix");
 	 private  final ArrayList<String> jingxuanji_keyword = loadFile(
 			"nlp/pick/jingxuanjiwords_mixXiamiFeeling");
@@ -169,10 +151,10 @@ public class PickElementService{
 
 
 
-	/*
+	*//*
 	 * 获取语素匹配结果
 	 * @param lang
-	 * */
+	 * *//*
 	public  List<MusicSong> getPickResult(String lang) throws Exception{
 		List<MusicSong> list = new ArrayList<>();
 		String finalResult = commandInterpret(lang);
@@ -185,9 +167,9 @@ public class PickElementService{
 		return list;
 	}
 	
-	/*
+	*//*
 	 * 将json文件转换为MusicSong
-	 * */
+	 * *//*
 	public  MusicSong transJsonToMusicSongs(JSONObject object) {
 		MusicSong musicSong =  new MusicSong("xiami");;
 		if(!ObjectUtils.isEmpty(object.get("song_id"))) {
@@ -196,9 +178,9 @@ public class PickElementService{
 		if(!ObjectUtils.isEmpty(object.get("album_id"))) {
 			musicSong.setAlbum_id(object.getLong("album_id"));
 		}
-		/*if(!ObjectUtils.isEmpty(object.get("play_seconds"))) {
+		*//*if(!ObjectUtils.isEmpty(object.get("play_seconds"))) {
 			musicSong.setPlay_counts(object.getLong("play_seconds"));
-		}*/
+		}*//*
 		if(!ObjectUtils.isEmpty(object.get("album_logo"))) {
 			musicSong.setAlbum_logo(object.getString("album_logo"));
 		}
@@ -218,5 +200,5 @@ public class PickElementService{
 			musicSong.setPlay_counts(object.getLong("play_counts"));
 		}
 		return musicSong;
-	}
+	}*/
 }

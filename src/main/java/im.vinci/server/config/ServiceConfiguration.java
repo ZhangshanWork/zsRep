@@ -1,6 +1,5 @@
 package im.vinci.server.config;
 
-import com.aliyun.oss.OSSClient;
 import im.vinci.server.other.domain.profile.UserMusicProfileConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
@@ -26,8 +25,7 @@ public class ServiceConfiguration {
     @Profile(UserProfile.INTG)
     @PropertySource(value = {"classpath:/intg/authentication.properties",
             "classpath:/intg/user.properties",
-            "classpath:/intg/system.properties",
-            "classpath:/intg/mobile.properties"})
+            "classpath:/intg/system.properties"})
     static class ServiceIntgConfiguration {
     }
 
@@ -35,8 +33,7 @@ public class ServiceConfiguration {
     @Profile(UserProfile.QACI)
     @PropertySource(value = {"classpath:/qaci/authentication.properties",
             "classpath:/qaci/user.properties",
-            "classpath:/qaci/system.properties",
-            "classpath:/qaci/mobile.properties"})
+            "classpath:/qaci/system.properties"})
     static class ServiceQaciConfiguration {
     }
 
@@ -44,8 +41,7 @@ public class ServiceConfiguration {
     @Profile(UserProfile.PROD)
     @PropertySource(value = {"classpath:/prod/authentication.properties",
             "classpath:/prod/user.properties",
-            "classpath:/prod/system.properties",
-            "classpath:/prod/mobile.properties"})
+            "classpath:/prod/system.properties"})
     static class ServiceProdAConfiguration {
     }
 
@@ -77,13 +73,6 @@ public class ServiceConfiguration {
         factory.setMaxRequestSize("5MB");
         factory.setFileSizeThreshold("1MB");
         return factory.createMultipartConfig();
-    }
-
-    @Bean(name = "mobileUploadImgOssClient", destroyMethod = "shutdown")
-    public OSSClient client() {
-        OSSClient client = new OSSClient(env.getProperty("mobile.upload_img.endpoint"),
-                env.getProperty("mobile.upload_img.accessKeyId"), env.getProperty("mobile.upload_img.accessKeySecret"));
-        return client;
     }
 }
 
