@@ -1,7 +1,6 @@
 package im.vinci.server.recomd.service;
 
 import com.taobao.api.ApiException;
-import im.vinci.server.other.domain.wrappers.requests.music.MusicSimilarity;
 import im.vinci.server.recomd.domain.RecomdInput;
 
 import java.util.List;
@@ -16,5 +15,5 @@ public interface RecomdService {
 
     public List<String> getTopCollections(int size);
 
-    public List<String> getSimilarMusic(MusicSimilarity musicSimilarity) throws ApiException;
+    public List<String> getSimilarMusic(String id) throws ApiException;
 }

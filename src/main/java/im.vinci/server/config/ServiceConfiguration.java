@@ -1,6 +1,5 @@
 package im.vinci.server.config;
 
-import im.vinci.server.other.domain.profile.UserMusicProfileConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -53,13 +52,6 @@ public class ServiceConfiguration {
 	static class ServiceProd_USConfiguration {
 	}
 
-
-    @Bean
-    public UserMusicProfileConstant userMusicProfileConstant() {
-        UserMusicProfileConstant userMusicProfileConstant = new UserMusicProfileConstant();
-        userMusicProfileConstant.setEnv(env);
-        return userMusicProfileConstant;
-    }
 
     @Bean
     public RestTemplate restTemplate() {
