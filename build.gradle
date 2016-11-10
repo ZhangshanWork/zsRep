@@ -126,9 +126,9 @@ dependencies {
     compile name : 'microsoft-translator-java-api-0.7-SNAPSHOT'
     compile name : 'ansj_seg-5.0.0-all-in-one'
 
-    compile name : 'javax.mail-1.5.5'
-    compile name : 'jcommon-1.0.23'
-    compile name : 'jfreechart-1.0.19'
+//    compile name : 'javax.mail-1.5.5'
+//    compile name : 'jcommon-1.0.23'
+//    compile name : 'jfreechart-1.0.19'
 
 //	compile 'net.sf.ezmorph:ezmorph:1.0.6'
     compile 'com.hankcs:hanlp:portable-1.2.8'
@@ -197,17 +197,17 @@ dependencies {
     compile "com.mashape.unirest:unirest-java:1.4.9"
 
     // The database driver for MySQL here
-    compile 'mysql:mysql-connector-java:' + mysqlConnectorVersion
+//    compile 'mysql:mysql-connector-java:' + mysqlConnectorVersion
     // Tools used to create ORM for database
-    compile 'org.mybatis:mybatis:' + mybatisVersion
-    compile 'org.mybatis:mybatis-spring:' + mybatisSpringVersion
+//    compile 'org.mybatis:mybatis:' + mybatisVersion
+//    compile 'org.mybatis:mybatis-spring:' + mybatisSpringVersion
     // Datasource tools
-    compile "com.alibaba:druid:$druidVersion"
+//    compile "com.alibaba:druid:$druidVersion"
     // The object pooling library for redis
-    compile "org.apache.commons:commons-pool2:$commonsPoolVersion"
+//    compile "org.apache.commons:commons-pool2:$commonsPoolVersion"
 
     //极光推送
-    compile "cn.jpush.api:jpush-client:$jPushVersion"
+//    compile "cn.jpush.api:jpush-client:$jPushVersion"
 
     // To automatically convert between json string and java object
     compile "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
@@ -231,21 +231,21 @@ dependencies {
     testCompile 'com.jayway.jsonpath:json-path:' + jsonpathVersion
     testCompile 'com.jayway.jsonpath:json-path-assert:' + jsonpathVersion
 
-    compile "org.apache.tika:tika-core:$tikaCoreVersion"
+//    compile "org.apache.tika:tika-core:$tikaCoreVersion"
 
     compile "com.google.guava:guava:$guavaVersion"
-    compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
+//    compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
 
 
-    compile "com.aliyun.openservices:ons-client:$aliyunOnsClientVersion"
-    compile ("com.aliyun.opensearch:aliyun-sdk-opensearch:$aliyunOpenSearchClientVersion") {
-        exclude group:"junit"
-        exclude group:"org.slf4j"
-    }
-    compile group: 'com.aliyun.oss', name: 'aliyun-sdk-oss', version: '2.2.3.2-FOR-TFS'
-    //以下两个是RAM STS的调用sdk
-    compile "com.aliyun:aliyun-java-sdk-sts:2.1.6"
-    compile "com.aliyun:aliyun-java-sdk-core:2.1.7"
+//    compile "com.aliyun.openservices:ons-client:$aliyunOnsClientVersion"
+//    compile ("com.aliyun.opensearch:aliyun-sdk-opensearch:$aliyunOpenSearchClientVersion") {
+//        exclude group:"junit"
+//        exclude group:"org.slf4j"
+//    }
+//    compile group: 'com.aliyun.oss', name: 'aliyun-sdk-oss', version: '2.2.3.2-FOR-TFS'
+//    //以下两个是RAM STS的调用sdk
+//    compile "com.aliyun:aliyun-java-sdk-sts:2.1.6"
+//    compile "com.aliyun:aliyun-java-sdk-core:2.1.7"
 
 
     compile 'com.cronutils:cron-utils:5.0.0'

@@ -2,7 +2,6 @@ package im.vinci.server.recomd.controller;
 
 import im.vinci.server.common.exceptions.VinciException;
 import im.vinci.server.common.exceptions.error.ErrorCode;
-import im.vinci.server.other.domain.wrappers.requests.music.MusicSimilarity;
 import im.vinci.server.recomd.domain.RecomdInput;
 import im.vinci.server.recomd.service.RecomdService;
 import im.vinci.server.utils.BizTemplate;
@@ -51,12 +50,7 @@ public class RecomdController {
 
             @Override
             protected ResultList<String> process() throws Exception {
-                MusicSimilarity musicSimilarity = new MusicSimilarity();
-                musicSimilarity.setUserId(userId);
-                musicSimilarity.setMusicId(musicId);
-                musicSimilarity.setSize(size);
-
-                List<String> musicList = recomdService.getSimilarMusic(musicSimilarity);
+                List<String> musicList = recomdService.getSimilarMusic(musicId);
                 return new ResultList<>(musicList);
             }
 
