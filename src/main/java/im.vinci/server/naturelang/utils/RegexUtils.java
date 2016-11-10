@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  */
 public class RegexUtils {
     public static void main(String[] args) {
-        System.out.println(filterNumer("播放录音160618"));
+        System.out.println(regexYear("2015年去年冬天"));
     }
 
     /**
@@ -26,4 +26,26 @@ public class RegexUtils {
         return result;
     }
 
+    /**
+     * 解析当前时间
+     * @param date
+     * @return
+     */
+    public static String regexYear(String date) {
+        String result = "";
+        String year = "今年|明年|去年|前年|后年|大后年|大前年|年底|\\d{2,4}年";
+        Pattern p = Pattern.compile(year);
+        Matcher m = p.matcher(date);
+        while (m.find()) {
+            result = m.group();
+        }
+        switch (result) {
+            case "今年":
+                break;
+            
+
+
+        }
+        return result;
+    }
 }

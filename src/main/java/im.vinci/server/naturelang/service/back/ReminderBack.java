@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 import static com.cronutils.model.field.expression.FieldExpressionFactory.*;
 
-public class ClockBack {
+public class ReminderBack {
     private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>(),
             day_list=new Hashtable<String,Integer>(),
             time_list=new Hashtable<String,Integer>(),
@@ -41,7 +41,7 @@ public class ClockBack {
     private String[] time=new String[6]; //store the crontab time information(minute,hour,day,month,week,year)
     public int tomorrow=0,dialogue_time=0;
     private int[] advance = {0,0};
-    public ClockBack(Parameter parameter){
+    public ReminderBack(Parameter parameter){
         //log.info("set clock service");
         //log.info("the message is "+msg);
         initial();
@@ -242,7 +242,7 @@ public class ClockBack {
         checkFestival(this.msg);
         int  number=0;
 //check  if  he  want  set  after  clock
-        number=check_after(this.msg);
+        number= checkAfter(this.msg);
         if(number>0){
             String  str  =  this.msg.substring(((number-10)<0?0:number-10),number);
             int  time  =  getAfterTime(str);
@@ -658,9 +658,9 @@ public class ClockBack {
         }
         return hour;
     }
-    private int check_after(String msg){
+    private int checkAfter(String msg){
         int length=-1;
-        Pattern p = Pattern.compile("\\D{0,3}((月)|(周)|(天)|(小时)|(分钟*)|(刻钟*)|(个点)|(秒))后");
+        Pattern p = Pattern.compile("\\D{0,3}((月)|(周)|(天)|(小时)|(分钟*)|(刻钟*)|(个点)|(秒))(以后|后)");
         Matcher m = p.matcher(msg);
         if(m.find()){
             length=m.end();

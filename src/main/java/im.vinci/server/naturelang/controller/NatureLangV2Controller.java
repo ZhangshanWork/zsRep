@@ -9,7 +9,7 @@ import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.service.DispatcherService;
 import im.vinci.server.naturelang.service.back.PmBack;
 import im.vinci.server.naturelang.service.back.RecordBack;
-import im.vinci.server.naturelang.service.back.ClockBack;
+import im.vinci.server.naturelang.service.back.ReminderBack;
 import im.vinci.server.naturelang.service.back.WeatherBack;
 import im.vinci.server.naturelang.utils.CommonUtils;
 import im.vinci.server.naturelang.utils.ObjectUtils;
@@ -148,7 +148,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
 
     //定时提醒
     private void processSchedule(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        Response response_schedule = new ClockBack(parameter).response;
+        Response response_schedule = new ReminderBack(parameter).response;
 
         JSONObject semantic = new JSONObject();
         JSONObject slot = new JSONObject();
