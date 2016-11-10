@@ -22,3 +22,17 @@ Settings=open_settings
 
 switchtospotify=switchto_spotify
 switchtosoundcloud=switchto_soundcloud
+
+MyHeartRate=heart_rate
+MyCurrentHeartRate=heart_rate
+WhatsMyHeartRate=heart_rate
+WhatIsMyHeartRate=heart_rate
+CheckMyHeartRate=heart_rate
+TellMeMyHeartRate=heart_rate
+
+MySteps=my_step
+HowManyStepsHaveIWalkedToday=my_step
+HowManySteps=my_step
+CheckMySteps=my_step
+TellMeMySteps=my_step
+TellMeMyStepsToday=my_step

@@ -3,92 +3,98 @@ package im.vinci.server.naturelang.service.decision;
 import im.vinci.server.naturelang.domain.ServiceRet;
 import org.ansj.domain.Result;
 import org.ansj.splitWord.analysis.ToAnalysis;
-import org.springframework.stereotype.Service;
 
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-//问题：没有进行数字的转换呢
-
-public class Record_check {
+public class ReminderDecision {
 	private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>();
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-	public ServiceRet record_check(String msg){
-		//String[] keywords = {"???","?????","?1??","???","?1??","???","????????","","","","","","",""};
+	private String[] select_list={"查看","查询","看看"};//enter search situation condition
+	private String[] delete_list={"删除","取消"};//enter cancel situation condition
+	//private Logger log = LoggerFactory.getLogger(this.getClass());
+	public ServiceRet service_check(String msg){
+		//log.info("service: clock check");
+		//log.info("message is:"+msg);
+		msg = number_exchange(msg);
 		//JSONObject result = new JSONObject();
 		ServiceRet sr = new ServiceRet();
-		//log.info("record check service start");
 		try{
 			if(msg.equals(null) || msg.equals("")){
 				sr.setRc(4);
 				sr.setService("");
 				sr.setOperation("");
 				return sr;
-				//result.put("rc", 4);
-				//result.put("service", "record");
-				//result.put("operation", "");
-				//log.info("message is null");
-				//return result.toString();
 			}
-			msg = number_exchange(msg);
+			String[] enter_condition = {"定时","提醒","闹钟","闹铃","叫醒","提示","专注","静心","专心","通知"};
+			for(int i=0;i<enter_condition.length;i++){
+				if(msg.contains(enter_condition[i])){
+					sr.setRc(0);
+					sr.setService("schedule");
+				}
+			}
 			boolean time = false;
 			Result r = ToAnalysis.parse(msg);
 			String[] str = r.toString().split(",");
 			for(int i=0;i<str.length;i++){
-				if(str[i].split("/")[1].equals("t")){
+				if(str[i].split("/").length>1 && str[i].split("/")[1].equals("t")){
 					time = true;
-					break;
 				}
 			}
-			if(!time){
-				Pattern p = Pattern.compile("(\\d{1,2}(日|号))|(刚才)");
-				Matcher m = p.matcher(msg);
+			Pattern p = Pattern.compile("(\\d{1,2}点钟+)|(\\d{1,2}点\\d{1,2}分)|(\\d{1,2}点(半|1刻))|(个月\\d{1,2}(号|日))|(\\d{1,2}(号|日))");
+			Matcher m ;
+			if(time == false){
+				m = p.matcher(msg);
 				if(m.find()){
 					time = true;
 				}
 			}
-			Pattern p = Pattern.compile("(录\\S{0,2}音)|(录(\\S?)个)|(录\\S?下)|(录\\S?(段|条|了))|(语音备忘)|(录\\S{0,4}声)");
-			Matcher m = p.matcher(msg);
+			p = Pattern.compile("(吃饭)|(睡觉)|(起床)|(开会)|(约会)|(打电话)|(叫\\D)|(买|卖)|(出门)");
+			if(time == true){
+				m = p.matcher(msg);
+				if(m.find()){
+					sr.setRc(0);
+					sr.setService("schedule");
+				}
+			}
+
+			sr.setOperation("");
+			//check if he want to search clock
+			for(int i=0;i<this.select_list.length;i++){
+				if( msg.contains(this.select_list[i])){
+					//query();
+					sr.setOperation("VIEW");
+					return sr;
+				}
+			}
+			p = Pattern.compile("有\\S{0,2}个");
 			m = p.matcher(msg);
 			if(m.find()){
-				sr.setRc(0);
-				sr.setService("record");
-				//result.put("rc", 0);
-				//result.put("service", "record");
-				if(msg.contains("播放")||msg.contains("听")||time){
-					sr.setOperation("query");
-					return sr;
-					//result.put("operation", "query");
-					//Select_record sr = new Select_record();
-					//sr.select_record(msg);
-				}
-				sr.setOperation("set");
+				sr.setOperation("VIEW");
 				return sr;
-				//result.put("opration", "set");
 			}
-			else if(msg.contains("录的")&&time){
-				sr.setRc(0);
-				sr.setService("record");
-				sr.setOperation("query");
+			//check if he want to delete clock
+			for(int i=0;i<this.delete_list.length;i++){
+				if( msg.contains(this.delete_list[i])){
+					//delete();
+					sr.setOperation("DELETE");
+					return sr;
+				}
+			}
+			if(sr.getOperation().equals("") && sr.getService() != null){
+				sr.setOperation("CREATE");
 				return sr;
-				//result.put("rc", 0);
-				//result.put("service", "record");
-				//result.put("operation", "query");
-				//Select_record sr = new Select_record();
-				//sr.select_record(msg);
+			}
+			if(sr.getService() == null){
+				//System.out.println("hah ");
+				sr.setRc(4);
+				sr.setService("");
 			}
 		}
 		catch(Exception e){
-			//e.printStackTrace();
-			log.error(e.getMessage());
+			//	log.info("error is:"+e.getMessage());
 		}
-		sr.setRc(4);
-		sr.setService("");
-		sr.setOperation("");
+		//log.info(result.toString());
 		return sr;
-		//log.info("result is:"+result.toString());
 		//return result.toString();
 	}
 
@@ -159,4 +165,3 @@ public class Record_check {
 	}
 
 }
-

@@ -2,7 +2,6 @@ package im.vinci.server.naturelang.controller;
 
 import im.vinci.server.naturelang.domain.*;
 import im.vinci.server.naturelang.domain.SematicCode.CodeEnum;
-import im.vinci.server.naturelang.domain.nation.ApiDotAiResult;
 import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.service.impl.process.ElasticHandler;
 import im.vinci.server.naturelang.utils.CommonUtils;
@@ -17,8 +16,8 @@ import im.vinci.server.search.service.HimalayaSearchService;
 import im.vinci.server.utils.Networks;
 import im.vinci.server.utils.apiresp.ResponsePageVo;
 import im.vinci.server.utils.apiresp.ResultObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping(
@@ -42,61 +43,7 @@ public class NatureLangController extends NatureLangBaseController{
         return new ResultObject(this.natureLangSerivce.getFilteredSingersResult(lang));
     }
 
-    @RequestMapping({"/nationresult"})
-    public ResultObject<UnderStandResult> getNationLangResult(String lang) throws Exception {
-        UnderStandResult underStandResult = new UnderStandResult();
-        UnderstandModel result = new UnderstandModel();
-        //预设所有结果均为正确输出
-        underStandResult.setFlag("ON");
-        if(!StringUtils.isNotBlank(lang)) {
-            return null;
-        } else {//英文音乐结果合成
-            String lang1 = lang.replace(" ", "");
-            if(StringUtils.isNotBlank(Context.fetchNationMachine(lang1))) {//机器指令分析
-                InstructSemantic list = new InstructSemantic();
-                result.setCode(CodeEnum.machine_instruct.toString());
-                list.setInstruct(Context.fetchNationMachine(lang1));
-                result.setInstructSemantic(list);
-            } else {
-                lang = _processFrom(lang, result);
-                lang1 = lang.replace(" ", "");
-                composeMusicNation(lang, lang1, result, underStandResult);
-            }
-            underStandResult.setUnderStandModel(result);
-            return new ResultObject<>(underStandResult);
-        }
-    }
-
-    //解析来源
-    private String _processFrom(String lang, UnderstandModel result) {
-        String lang1 = "";
-        if(lang.matches("^.*[from|on|in][spotify|soundcloud|alexa|Prime|Amazon|].*$")){
-            if(lang.contains("spotify")){
-                result.setFrom("spotify");
-            } else if (lang.contains("soundcloud")) {
-                result.setFrom("soundcloud");
-            }else{
-                result.setFrom("alexa");
-            }
-            String[] words = lang.split(" ");
-            int i = 0; //哨兵
-            for (String word : words) {
-                i++;
-                if (word.equalsIgnoreCase("spotify") || word.equalsIgnoreCase("soundcloud") || word.equalsIgnoreCase("alexa")
-                        || word.equalsIgnoreCase("Prime") || word.equalsIgnoreCase("Amazon")) {
-                    break;
-                }
-            }
-            for(int j=0;j<i-2;j++) {
-                lang1 += words[j]+" ";
-            }
-        }else{
-            result.setFrom("alexa");
-        }
-        return lang1;
-    }
-
-    @RequestMapping({"/nationresult/v1"})
+    @RequestMapping({"/nationresult/v1","/nationresult"})
     public ResultObject<UnderStandResult> getNationLangResult(
             @RequestHeader(value = "vinci-imei", defaultValue = "") String imei,
             String lang) throws Exception {
@@ -106,14 +53,14 @@ public class NatureLangController extends NatureLangBaseController{
         ResultObject<UnderStandResult> ro = new ResultObject<>(underStandResult);
         //预设所有结果均为正确输出
         underStandResult.setFlag("ON");
-        if(!StringUtils.isNotBlank(lang)) {
+        if(StringUtils.isBlank(lang)) {
             result.setCode(CodeEnum.answer.toString());
             AnswerSemantic answerSemantic = new AnswerSemantic();
             answerSemantic.setText("I didn't hear what you said");
             result.setAnswer(answerSemantic);
             return ro;
         }
-        ApiDotAiResult apiDotAiResult = apiDotAiChatbotService.nlu(lang,imei);
+        /*ApiDotAiResult apiDotAiResult = apiDotAiChatbotService.nlu(lang,imei);
         if (apiDotAiResult != null && apiDotAiResult.getStatus() != null && apiDotAiResult.getStatus().getCode() == 200
                 && apiDotAiResult.getResult() != null) {
             String action = apiDotAiResult.getResult().getAction();
@@ -125,16 +72,46 @@ public class NatureLangController extends NatureLangBaseController{
                 result.setAnswer(answerSemantic);
                 return ro;
             }
+        }*/
+        //英文音乐结果合成
+        lang = StringUtils.trim(lang);
+        String instruct = Context.fetchNationMachine(lang); //是否指令词
+        if (StringUtils.isNotBlank(instruct)) {//机器指令分析
+            InstructSemantic list = new InstructSemantic();
+            result.setCode(CodeEnum.machine_instruct.toString());
+            list.setInstruct(instruct);
+            result.setInstructSemantic(list);
+        } else {
+            composeMusicNation(_processFrom(lang, result), result, underStandResult);
         }
-        return getNationLangResult(lang);
+        underStandResult.setUnderStandModel(result);
+        return ro;
     }
 
-    public void filterNationSematic(MusicSemantic semantic,String lang) throws IOException {
+    private static Pattern processFromPattern = Pattern.compile("(.+)( (from|on|in) (spotify|soundcloud|alexa|Prime|Amazon))$",Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
+    //解析来源
+    private String _processFrom(String lang, UnderstandModel result) {
+        Matcher matcher = processFromPattern.matcher(lang);
+        if(matcher.matches()){
+            String langLower = lang.toLowerCase();
+            if(langLower.contains("spotify")){
+                result.setFrom("spotify");
+            } else if (langLower.contains("soundcloud")) {
+                result.setFrom("soundcloud");
+            }else {
+                result.setFrom("alexa");
+            }
+            return matcher.group(1);
+        }
+        return lang;
+    }
+
+    public void filterNationSemantic(MusicSemantic semantic, String lang) throws IOException {
         if(StringUtils.isNotBlank(semantic.getSong()) && StringUtils.isBlank(semantic.getArtist())) {
             String enSong = semantic.getSong().replace(" ", "_").replace("\'", "_");
             if(Context.IfSinger(enSong)) {
                 semantic.setArtist(semantic.getSong());
-                semantic.setSong((String)null);
+                semantic.setSong(null);
             }
         }
         adjustResult(semantic, lang);
@@ -189,7 +166,7 @@ public class NatureLangController extends NatureLangBaseController{
                 xunfei.setFlag("today");
                 xunfei.setText(Context.getPromotion());
                 list = new ArrayList<>();
-            } else if ((!CollectionUtils.isEmpty(list) && ifListenOrChat(lang, (MusicSemantic) list.get(0))) || Context.IfSingerInLang(lang) || Context.ifWhite(lang)
+            } else if ((CollectionUtils.isNotEmpty(list) && ifListenOrChat(lang, (MusicSemantic) list.get(0))) || Context.IfSingerInLang(lang) || Context.ifWhite(lang)
                     || Context.ifXunfeiOrMusic("music", lang)) {
                 lang = Context.filterXiamiLang(lang);
                 list = this.natureLangSerivce.getFinalResult(lang);
@@ -652,30 +629,39 @@ public class NatureLangController extends NatureLangBaseController{
     }
 
     //音乐结果合成-国际版
-    private void composeMusicNation(String lang,String lang1,UnderstandModel result,UnderStandResult underStandResult) throws Exception {
-        MusicSemantic list1 = new MusicSemantic();
-        if(StringUtils.isNotBlank(Context.fetchNationGerne(lang1))) {
+    private void composeMusicNation(String lang,UnderstandModel result,UnderStandResult underStandResult) throws Exception {
+        MusicSemantic musicSemantic = new MusicSemantic();
+
+        String nationGenre = Context.fetchNationGenre(lang);
+        if(StringUtils.isNotBlank(nationGenre)) {
             result.setCode(CodeEnum.music_genre.toString());
-            list1.setGenre(Context.fetchNationGerne(lang1).replace("_", " "));
-            result.setMusicSemantic(list1);
-        } else if(StringUtils.isNotBlank(Context.fetchNationScenarios(lang1))) {
+            musicSemantic.setGenre(nationGenre);
+            result.setMusicSemantic(musicSemantic);
+            return;
+        }
+        String nationScenarios = Context.fetchNationScenarios(lang);
+        if(StringUtils.isNotBlank(nationScenarios)) {
             result.setCode(CodeEnum.music_genre.toString());
-            list1.setGenre(Context.fetchNationScenarios(lang1).replace("_", " "));
-            result.setMusicSemantic(list1);
-        } else if(null != Context.fetchNationMood(lang1) && Context.fetchNationMood(lang1).size() > 0) {
+            musicSemantic.setGenre(nationScenarios);
+            result.setMusicSemantic(musicSemantic);
+            return;
+        }
+        Mood mood = Context.fetchNationMood(lang);
+        if (mood != null) {
             result.setCode(CodeEnum.music_mood.toString());
-            result.setMoodSongs(Context.fetchNationMood(lang1));
+            result.setText(mood.getAnswer());
+            result.setMoodSongs(mood.getSongs());
             underStandResult.setFlag("ON");
+            return;
+        }
+        List<MusicSemantic> list2 = this.natureLangSerivce.getNationFinalResult(lang);
+        if (CollectionUtils.isNotEmpty(list2) && this.filterObj(list2.get(0))) {
+            MusicSemantic semantic = list2.get(0);
+            this.getUnderStandCode(result, semantic);
+            this.filterNationSemantic(semantic, lang);
+            result.setMusicSemantic(semantic);
         } else {
-            List list2 = this.natureLangSerivce.getNationFinalResult(lang);
-            if(!list2.isEmpty() && this.filterObj((MusicSemantic)list2.get(0))) {
-                MusicSemantic semantic = (MusicSemantic)list2.get(0);
-                this.getUnderStandCode(result, semantic);
-                this.filterNationSematic(semantic,lang);
-                result.setMusicSemantic(semantic);
-            } else {
-                underStandResult.setFlag("OFF");
-            }
+            underStandResult.setFlag("OFF");
         }
     }
 

@@ -7,10 +7,10 @@ import im.vinci.server.naturelang.domain.*;
 import im.vinci.server.naturelang.domain.SematicCode.CodeEnum;
 import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.service.DispatcherService;
-import im.vinci.server.naturelang.service.back.PM_get;
-import im.vinci.server.naturelang.service.back.Select_record;
-import im.vinci.server.naturelang.service.back.SetClock;
-import im.vinci.server.naturelang.service.back.Weather_get;
+import im.vinci.server.naturelang.service.back.PmBack;
+import im.vinci.server.naturelang.service.back.RecordBack;
+import im.vinci.server.naturelang.service.back.ReminderBack;
+import im.vinci.server.naturelang.service.back.WeatherBack;
 import im.vinci.server.naturelang.utils.CommonUtils;
 import im.vinci.server.naturelang.utils.ObjectUtils;
 import im.vinci.server.naturelang.utils.TranslateBing;
@@ -148,23 +148,17 @@ public class NatureLangV2Controller extends NatureLangBaseController{
 
     //定时提醒
     private void processSchedule(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        Response response_schedule = new SetClock(parameter).response;
+        Response response_schedule = new ReminderBack(parameter).response;
 
         JSONObject semantic = new JSONObject();
         JSONObject slot = new JSONObject();
         JSONObject datetime = new JSONObject();
-
         semantic.put("content", response_schedule.getSemantic().getContent());
-
         slot.put("name", response_schedule.getSemantic().getSlots().getName());
 
         if(response_schedule.getOperation().equals("CONCENTRATE")){
-//            slot.put("whiteNoise",response_schedule.getSemantic().getSlots().getWhiteNoise());
             slot.put("whiteNoise",Context.getWhiteNoise());
-        }/*else{
-            slot.put("whiteNoise","");
-
-        }*/
+        }
 
         datetime.put("type", response_schedule.getSemantic().getSlots().getDatetime().getType());
         datetime.put("date", response_schedule.getSemantic().getSlots().getDatetime().getDate());
@@ -207,7 +201,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
 
     //空气质量
     private void processPM25(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        Response_PM response_pm = new PM_get().get_PM(parameter);
+        PMResponse response_pm = new PmBack().getPM(parameter);
         JSONObject semantic = new JSONObject();
 
         JSONObject slot = new JSONObject();
@@ -256,31 +250,9 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         responseResult.setSpeech(answer);
     }
 
-
-
-
-//        Map map1 = xunfeiSearchService.reponseXunfei(parameter.getQuery());
-//        JSONObject json = (JSONObject) map1.get("result");
-//        responseResult.setSemantic(json.getJSONObject("semantic"));
-//        JSONObject jsonObject = json.getJSONObject("data").getJSONArray("result").getJSONObject(0);
-//        String answer = "";
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("area"))){
-//            answer = answer + " 地区：" +jsonObject.getString("area");
-//        }
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("pm25"))){
-//            answer = answer + " pm2.5：" +jsonObject.getString("pm25");
-//        }
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("quality"))){
-//            answer = answer + " 空气质量：" +jsonObject.getString("quality");
-//        }
-//        if (StringUtils.isNotBlank(answer)&&ObjectUtils.isNotEmperty(jsonObject.get("publishDateTime"))) {
-//            answer = " 信息发布时间: " + jsonObject.getString("publishDateTime") + "," + answer;
-//        }
-//        responseResult.setSpeech(answer);
-
     //天气
     private void processWeather(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        Response_weather response_weather = new Weather_get().get_weather(parameter);
+        WeatherResponse response_weather = new WeatherBack().get_weather(parameter);
 
         JSONObject semantic = new JSONObject();
 
@@ -315,23 +287,6 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         semantic.put("datetime",datetime);
 
         responseResult.setSemantic(semantic);
-//        Map map1 = xunfeiSearchService.reponseXunfei(parameter.getQuery());
-//        JSONObject json = (JSONObject) map1.get("result");
-//        responseResult.setSemantic(json.getJSONObject("semantic"));
-
-//        String nowDate = response_weather.getSemantic().getDatetime().getDate();
-//        if(nowDate.equalsIgnoreCase("CURRENT_DAY")){
-//            nowDate = DateUtil.today();
-//        }
-//        JSONObject jsonObject = json.getJSONObject("data").getJSONArray("result").getJSONObject(0);
-//        JSONArray jsonArray = json.getJSONObject("data").getJSONArray("result");
-//        for(int i=0;i<jsonArray.size();i++) {
-//            //如果存在时间此时间重合
-//            if(nowDate.equals(jsonArray.getJSONObject(i).getString("date"))){
-//                jsonObject = jsonArray.getJSONObject(i);
-//                break;
-//            }
-//        }
         if(null != response_weather.getRtext() && !response_weather.getRtext().equals("")){
             responseResult.setAsked(response_weather.getRtext());
             responseResult.setSpeech(null);
@@ -413,7 +368,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
             responseResult.setSpeech("准备开始录音");
             return;
         }
-        Response_record response_record = new Select_record().select_record(parameter);
+        RecordResponse response_record = new RecordBack().selectRecord(parameter);
         JSONObject semantic = new JSONObject();
 
         JSONObject slot = new JSONObject();

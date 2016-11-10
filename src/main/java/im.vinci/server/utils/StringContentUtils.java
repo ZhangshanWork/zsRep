@@ -1,5 +1,7 @@
 package im.vinci.server.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;
 
@@ -46,6 +48,27 @@ public class StringContentUtils {
 
     public static String trimToEmpty(String str) {
         return str == null ? "" : str.trim();
+    }
+
+    public static String deleteWhiteSpaceAndOtherSignAndToLowerCase(String lang) {
+        if (StringUtils.isEmpty(lang)) {
+            return "";
+        }
+        final int sz = lang.length();
+        final char[] chs = new char[sz];
+        int count = 0;
+        for (int i = 0; i < sz; i++) {
+            if (Character.isLetterOrDigit(lang.charAt(i))) {
+                chs[count++] = lang.charAt(i);
+            }
+        }
+        String sb;
+        if (count == sz) {
+            sb = lang;
+        } else {
+            sb = new String(chs, 0, count);
+        }
+        return sb.toLowerCase();
     }
     public static void main(String[] args) {
         StringBuilder a = new StringBuilder("jz_我");

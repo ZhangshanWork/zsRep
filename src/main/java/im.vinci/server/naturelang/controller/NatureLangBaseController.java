@@ -4,7 +4,6 @@ import com.taobao.api.ApiException;
 import com.taobao.api.domain.StandardSong;
 import im.vinci.server.naturelang.domain.*;
 import im.vinci.server.naturelang.listener.Context;
-import im.vinci.server.naturelang.musicpick.pick.PickElementService;
 import im.vinci.server.naturelang.service.ApiDotAiChatbotService;
 import im.vinci.server.naturelang.service.NatureLangService;
 import im.vinci.server.naturelang.service.impl.XunFeiSearchService;
@@ -48,9 +47,6 @@ public class NatureLangBaseController {
     XunFeiSearchService xunfeiSearchService;
     @Autowired
     ApiDotAiChatbotService apiDotAiChatbotService;
-
-    @Autowired
-    PickElementService pickElementService;
 
     public ResponsePageVo<MusicSong> QueryXiamiSongsByKeyword(MusicSemantic music) throws ApiException {
         return QueryXiamiSongsByKeyword(music,10, true);

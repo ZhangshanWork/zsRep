@@ -1,5 +1,15 @@
 package im.vinci.server.naturelang.service.back;
 
+import com.iflytek.cloud.speech.SpeechError;
+import com.iflytek.cloud.speech.TextUnderstander;
+import com.iflytek.cloud.speech.TextUnderstanderListener;
+import com.iflytek.cloud.speech.UnderstanderResult;
+import im.vinci.server.naturelang.domain.GuideResponse;
+import im.vinci.server.naturelang.domain.Parameter;
+import im.vinci.server.naturelang.domain.XunfeiGuideResult;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -9,22 +19,10 @@ import java.net.URLEncoder;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.iflytek.cloud.speech.SpeechError;
-import com.iflytek.cloud.speech.TextUnderstander;
-import com.iflytek.cloud.speech.TextUnderstanderListener;
-import com.iflytek.cloud.speech.UnderstanderResult;
-
-import im.vinci.server.naturelang.domain.Parameter;
-import im.vinci.server.naturelang.domain.Response_guide;
-import im.vinci.server.naturelang.domain.Xunfei_guide_result;
-
-
-public class Guide {
-	private Response_guide rg = new Response_guide();
-	public Response_guide guide(Parameter msg){
+public class GuideBack {
+	private GuideResponse rg = new GuideResponse();
+	public GuideResponse guide(Parameter msg){
 		//String str = "从北京王府井大街到北京海淀区中央财经大学";
 		//String m = "我要到中央财经大学";
 		//msg = "{\"query\":\""+m+"\",\"location\":{\"latitude\" : 39.9498, \"longitude\": 116.4166 }}";
@@ -36,7 +34,7 @@ public class Guide {
 			rg.setText(str);
 			String lat_lon = msg.getLocation().getLongitude()+""+msg.getLocation().getLatitude();
 //			System.out.println(lat_lon);
-			Xunfei_guide_result xgr = get_xunfei(str);
+			XunfeiGuideResult xgr = get_xunfei(str);
 //			System.out.println(new JSONObject(xgr));
 			if(xgr.getStart_current() && xgr.getStartPOI() == null){
 				//直接用定位的经纬度
@@ -118,9 +116,9 @@ public class Guide {
 		return rg;
 	}
 	//获取讯飞地图导航服务的结果
-	private Xunfei_guide_result get_xunfei(String msg){
+	private XunfeiGuideResult get_xunfei(String msg){
 		final CountDownLatch cd = new CountDownLatch(1);
-		final Xunfei_guide_result xgr = new Xunfei_guide_result();
+		final XunfeiGuideResult xgr = new XunfeiGuideResult();
 		//创建文本语义理解对象
 		TextUnderstander mTextUnderstander = TextUnderstander.createTextUnderstander();
 		//初始化监听器

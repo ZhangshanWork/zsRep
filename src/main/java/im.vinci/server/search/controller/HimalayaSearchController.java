@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by tim@vinci on 15/12/23.
  */
 @RestController
-@RequestMapping(value = "/vinci/search/himalayas", produces = "application/json;charset=UTF-8")
+@RequestMapping(value = {"/vinci/search/himalayas"}, produces = "application/json;charset=UTF-8")
 public class HimalayaSearchController {
 
     @Autowired

@@ -30,26 +30,6 @@ public class ElasticHandler {
 	}
 
 	//用于分词,str为待分词的文本，useSmart = true表示smart模式,返回token组成的ArrayList<String>
-	public  ArrayList<String> cutNation(String str,boolean useSmart)
-	{
-		ArrayList<String> list = new ArrayList<String>();
-		Configuration cfg  = DefaultConfig.getInstance();
-		cfg.setUseSmart(useSmart);
-		StringReader reader=new StringReader(str);
-		IKSegmenter seg = new IKSegmenter(reader,cfg);
-		Lexeme lex = null;
-		try {
-			while((lex = seg.next()) != null) {
-				list.add(lex.getLexemeText());
-			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return list;
-	}
-
-	//用于分词,str为待分词的文本，useSmart = true表示smart模式,返回token组成的ArrayList<String>
 	public  ArrayList<String> cut(String str,boolean useSmart)
 	{
 		ArrayList<String> list = new ArrayList<String>();

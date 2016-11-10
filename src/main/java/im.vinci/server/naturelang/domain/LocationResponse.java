@@ -1,6 +1,6 @@
 package im.vinci.server.naturelang.domain;
 
-public class Response_location{
+public class LocationResponse {
 	private String cityAddr;
 	private String city;
 	private String type;

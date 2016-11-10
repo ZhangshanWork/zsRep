@@ -1,18 +1,119 @@
- [
-    { "keywords":"I'm feeling happy; I'm feeling good; I'm feeling jolly; I'm happy; Today's a good day; It's gonna be a good day; I'm ready; It's a new day; It's sunny outside; It's summer;It's spring; It's nice outside" ,
-      "songs":"Young & Free;Feel Good Indie Rock;Mood Booster;Happy Hits!;Confidence Boost;Just Smile;The Happy Hipster;Sunny Side Up;Seize the Day!;warm hearts feel good;Spring Forward;Who Run The World? Girls;" },
-    { "keywords":"I'm feeling funky; I want to hear some covers; It's Fall; I want something comfortable" ,
-      "songs":"Acoustic Covers;Feelin' Good;Ultimate Covers;Happy Folk;Autumn Lounge;Informal is Now Normal;Have A Laugh" },
-    { "keywords":"I'm feeling jazzy; I want some coffee;I want some caffeine;I need some coffee;I need some caffeine; good afternoon; coffee time" ,
-      "songs":"Soul Coffee;House Relax;Your Favorite Coffeehouse;Your Coffee Break;#NaNoWriMo" },
-    { "keywords":"I'm getting ready; It's a new day; It's sunny outside; Good morning; morning Vinci; Hi Vinci" ,
-      "songs":"Smooth Morning;Morning Rhythm;Ready for the Day;Beat Down Your Morning;Tropical Morning;" },
-    { "keywords":"I'm sad; I miss my friends; I miss my boyfriend; I miss my girlfriend; I'm lonely; I'm feeling nostalgic; I wanna cry;I want to cry; I just broke up; I am sleepless; I couldn’t sleep" ,
-      "songs":"Acoustic Winter;Melancholia;Deep Dark Indie;Forever Alone;The Cure for Loneliness;Coping With Loss;Last One Awake;Deep Dark Indie Folk" },
-    { "keywords":"I feel good;I feel sexy;I wanna party;let's party;Let’s dance" ,
-      "songs":"Good Vibes;Young, Wild & Free;International Playboy;Shimmer + Vibe;" },
-    { "keywords":"I'm drained; I'm braindead; Im super tired; I just wana relax; I just wana chill; Good night; I'm stressed; I need to calm down" ,
-      "songs":"Brain Food;Calm Down;Cool, Calm, & Collected;Songs for Sunsets;Epic Classical" },
-    { "keywords":"I'm angry; I'm frustrated; Ugh; It's gross outside; I hate everything; I hate this; I don't want to do this/anything" ,
-      "songs":"Dark & Stormy;Femme Fatale;SHOEGAZE" }
-  ]
+[
+  {
+    "mood": "happy",
+    "keywords": [
+      "happy",
+      "jolly",
+      "spring",
+      "summer"
+    ],
+    "special_word": {
+      "have a good day": "You look so happy, enjoy some jolly songs",
+      "i have a good day": "You look so happy, enjoy some jolly songs",
+      "have a nice day": "You look so happy, enjoy some jolly songs",
+      "i have a nice day": "You look so happy, enjoy some jolly songs"
+    },
+    "songs": [
+      "Young & Free",
+      "Feel Good Indie Rock",
+      "Mood Booster",
+      "Happy Hits!",
+      "Confidence Boost",
+      "Just Smile",
+      "The Happy Hipster",
+      "Sunny Side Up",
+      "Seize the Day!",
+      "warm hearts feel good",
+      "Spring Forward",
+      "Who Run The World? Girls."
+    ]
+  },
+  {
+    "mood": "coffee",
+    "keywords": [
+      "coffee",
+      "caffeine",
+      "coffeetime",
+      "cafe"
+    ],
+    "special_word": {
+      "i am in cafe":"Enjoy your life a little bit, searching track for you.",
+      "im in cafe":"Enjoy your life a little bit, searching track for you.",
+      "im drinking coffee":"Enjoy your life a little bit, searching track for you.",
+      "good afternoon":"Enjoy your life a little bit, searching track for you."
+    },
+    "songs": [
+      "Soul Coffee",
+      "House Relax",
+      "Your Favorite Coffeehouse",
+      "Your Coffee Break",
+      "NaNoWriMo"
+    ]
+  },
+  {
+    "mood": "morning",
+    "keywords": [
+      "morning",
+      "sunny",
+      "sunshine",
+      "cafe"
+    ],
+    "special_word": {
+      "good morning":"Have a nice day, let’s enjoy some music.",
+      "good morning vinci":"Have a nice day, let’s enjoy some music.",
+      "today is a sunny day":"Have a nice day, let’s enjoy some music."
+    },
+    "songs": [
+      "Smooth Morning",
+      "Morning Rhythm",
+      "Ready for the Day",
+      "Beat Down Your Morning",
+      "Tropical Morning"
+    ]
+  },
+  {
+    "mood": "sad",
+    "keywords": [
+      "sad",
+      "lonely",
+      "heartbreak"
+    ],
+    "special_word": {
+      "miss my friends":"Cheer up, let’s enjoy some music.",
+      "miss my boyfriend":"Cheer up, let’s enjoy some music.",
+      "miss my girlfriend":"Cheer up, let’s enjoy some music.",
+      "I am lonely":"Cheer up, let’s enjoy some music.",
+      "I want cry":"Cheer up, let’s enjoy some music.",
+      "I am crying":"Cheer up, let’s enjoy some music.",
+      "I am so sad":"Cheer up, let’s enjoy some music.",
+      "My heart just broke up":"Cheer up, let’s enjoy some music."
+    },
+    "songs": [
+      "Acoustic Winter",
+      "Melancholia",
+      "Deep Dark Indie",
+      "Forever Alone",
+      "The Cure for Loneliness",
+      "Coping With Loss",
+      "Last One Awake",
+      "Deep Dark Indie Folk"
+    ]
+  },
+  {
+    "mood": "angry",
+    "keywords":[
+      "angry"
+    ],
+    "special_word": {
+      "I am so angry": "OK, maybe you should listen to some music.",
+      "I'm so angry": "OK, maybe you should listen to some music.",
+      "I don’t want to do anything": "OK, maybe you should listen to some music.",
+      "I hate everything": "OK, maybe you should listen to some music."
+    },
+    "songs": [
+      "Dark & Stormy",
+      "Femme Fatale",
+      "SHOEGAZE"
+    ]
+  }
+]
