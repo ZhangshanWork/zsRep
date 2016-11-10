@@ -6,7 +6,6 @@ import com.taobao.api.domain.RecommendSong;
 import com.taobao.api.domain.StandardSong;
 import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.utils.ObjectUtils;
-import im.vinci.server.other.domain.wrappers.requests.music.MusicSimilarity;
 import im.vinci.server.recomd.domain.RecomdInput;
 import im.vinci.server.recomd.service.RecomdService;
 import im.vinci.server.search.service.XiamiMusicSearchService;
@@ -119,9 +118,9 @@ public class RecomdServiceImpl implements RecomdService {
 
     //获取相似歌曲
     @Override
-    public List<String> getSimilarMusic(MusicSimilarity musicSimilarity) throws ApiException {
+    public List<String> getSimilarMusic(String id) throws ApiException {
         List<String> result = new ArrayList<>();
-        List<StandardSong> lists = xiamiMusicSearchService.searchSongSimilarity(Long.valueOf(musicSimilarity.getMusicId()),10L);
+        List<StandardSong> lists = xiamiMusicSearchService.searchSongSimilarity(Long.valueOf(id),10L);
         for (StandardSong song : lists) {
             result.add(song.getSongId() + "");
         }
