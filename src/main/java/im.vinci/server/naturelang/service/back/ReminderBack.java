@@ -5,6 +5,7 @@ import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.field.expression.FieldExpression;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import im.vinci.server.naturelang.domain.Parameter;
@@ -12,6 +13,8 @@ import im.vinci.server.naturelang.domain.Response;
 import im.vinci.server.naturelang.service.decision.ClockDecision;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
@@ -20,13 +23,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.cronutils.model.field.expression.FieldExpressionFactory.*;
 
 public class ReminderBack {
+    Logger logger = LoggerFactory.getLogger(this.getClass());
     private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>(),
             day_list=new Hashtable<String,Integer>(),
             time_list=new Hashtable<String,Integer>(),
@@ -41,9 +44,7 @@ public class ReminderBack {
     private String[] time=new String[6]; //store the crontab time information(minute,hour,day,month,week,year)
     public int tomorrow=0,dialogue_time=0;
     private int[] advance = {0,0};
-    public ReminderBack(Parameter parameter){
-        //log.info("set clock service");
-        //log.info("the message is "+msg);
+    public ReminderBack(Parameter parameter) throws JsonProcessingException {
         initial();
         preAnalyse(parameter);
     }
@@ -80,7 +81,7 @@ public class ReminderBack {
     }
 
     //预处理
-    private void preAnalyse(Parameter parameter){
+    private void preAnalyse(Parameter parameter) throws JsonProcessingException {
         if(parameter.equals(null)||parameter.getQuery()==null||parameter.getQuery().equals("")){
             response.setRc(4);
             response.setRtext("输入为空");
@@ -90,15 +91,16 @@ public class ReminderBack {
                 return;
             } catch (JsonMappingException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error(e.getMessage());
+                throw e;
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error(e.getMessage());
+                throw e;
             }
         }
         if(StringUtils.isNotBlank(parameter.getQuery())){
                 msg = parameter.getQuery();
-                //log.info("query is "+msg);
         }
 
         this.response.setText(msg);
@@ -155,7 +157,7 @@ public class ReminderBack {
             }
         }
         //if the action above are not satisfied, to set clock action
-        set_clock(this.msg);
+        setClock(this.msg);
     }
     //instead the different type of weekday to zhou type
     private String insteadWeek(String msg){
@@ -236,8 +238,7 @@ public class ReminderBack {
         return msg;
     }
     //set  the  clock  for  user
-    private  void  set_clock(String  msg){
-//this.a.setType("alert.set");
+    private  void setClock(String  msg){
         this.response.setOperation("CREATE");
         checkFestival(this.msg);
         int  number=0;
@@ -298,7 +299,7 @@ public class ReminderBack {
                     return;
                 }
                 else{
-                    this.response.setRtext("请问什么时候");
+                    this.response.setRtext("我不太懂，请使用明确时间进行设定");
                     resultWrite();
                     return;
                 }
@@ -388,7 +389,7 @@ public class ReminderBack {
                 return;
             }
             else if(!duration){
-                this.response.setRtext("请问什么时候");
+                this.response.setRtext("我不太懂，请使用明确时间进行设定");
                 resultWrite();
                 return;
             }
@@ -428,7 +429,7 @@ public class ReminderBack {
                 return;
             }
             else{
-                this.response.setRtext("请问几点");
+                this.response.setRtext("我不太懂，请使用明确时间进行设定");
                 resultWrite();
                 return;
             }
@@ -457,7 +458,7 @@ public class ReminderBack {
                 return;
             }
             else{
-                this.response.setRtext("请问几点");
+                this.response.setRtext("我不太懂，请使用明确时间进行设定");
                 resultWrite();
                 return;
             }
@@ -519,34 +520,7 @@ public class ReminderBack {
         }
 
     }
-    //check is it contain hour
-    private String check_hour_exsting(int[] hour,int i){
-        String answer = "";
-        if(hour[1]>0 || hour[2]>0){
-            this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-            return "";
-        }
-        else{
-            if(i==0){
-                this.response.setRtext("请问什么时候");
-            }
-            if(i>0){
-                //System.out.println("对不起，没听清，请您再说一遍");
-            }
-            if(i>3){
-                return "NO";
-            }
-            Scanner in = new Scanner(System.in);
-            answer = in.nextLine();
-            answer = numberExchange(answer);
-            this.message+=answer;
-            answer=this.msg+" "+answer;
-            this.msg = answer;
-            return answer;
-        }
 
-
-    }
     //check if contain regular keywords
     private boolean checkRegular(String msg){
         Pattern p = Pattern.compile("每隔*(周|\\d{0,2}天|\\d个月)|周末|工作日|(每个*月)");
@@ -670,7 +644,6 @@ public class ReminderBack {
         return length;
     }
     private int getAfterTime(String msg){
-        //System.out.println(msg);
         int number=0;
         Pattern p = Pattern.compile("\\d{1,2}个半小时");
         Matcher m = p.matcher(msg);
@@ -862,7 +835,6 @@ public class ReminderBack {
                     this.dt = this.dt.plusDays(1);
                     if(advance[0]>0||advance[1]>0){
                         this.dt = this.dt.plusHours(0-advance[0]);
-                        //System.out.println("advance"+advance[1]);
                         this.dt = this.dt.plusMinutes(0-advance[1]);
                     }
                     return;
@@ -871,7 +843,6 @@ public class ReminderBack {
                     this.dt = this.dt.plusDays(1);
                     if(advance[0]>0||advance[1]>0){
                         this.dt = this.dt.plusHours(0-advance[0]);
-                        //System.out.println("advance"+advance[1]);
                         this.dt = this.dt.plusMinutes(0-advance[1]);
                     }
                     return;

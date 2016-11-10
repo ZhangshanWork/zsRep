@@ -250,28 +250,6 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         responseResult.setSpeech(answer);
     }
 
-
-
-
-//        Map map1 = xunfeiSearchService.reponseXunfei(parameter.getQuery());
-//        JSONObject json = (JSONObject) map1.get("result");
-//        responseResult.setSemantic(json.getJSONObject("semantic"));
-//        JSONObject jsonObject = json.getJSONObject("data").getJSONArray("result").getJSONObject(0);
-//        String answer = "";
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("area"))){
-//            answer = answer + " 地区：" +jsonObject.getString("area");
-//        }
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("pm25"))){
-//            answer = answer + " pm2.5：" +jsonObject.getString("pm25");
-//        }
-//        if(ObjectUtils.isNotEmperty(jsonObject.get("quality"))){
-//            answer = answer + " 空气质量：" +jsonObject.getString("quality");
-//        }
-//        if (StringUtils.isNotBlank(answer)&&ObjectUtils.isNotEmperty(jsonObject.get("publishDateTime"))) {
-//            answer = " 信息发布时间: " + jsonObject.getString("publishDateTime") + "," + answer;
-//        }
-//        responseResult.setSpeech(answer);
-
     //天气
     private void processWeather(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
         WeatherResponse response_weather = new WeatherBack().get_weather(parameter);
@@ -309,23 +287,6 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         semantic.put("datetime",datetime);
 
         responseResult.setSemantic(semantic);
-//        Map map1 = xunfeiSearchService.reponseXunfei(parameter.getQuery());
-//        JSONObject json = (JSONObject) map1.get("result");
-//        responseResult.setSemantic(json.getJSONObject("semantic"));
-
-//        String nowDate = response_weather.getSemantic().getDatetime().getDate();
-//        if(nowDate.equalsIgnoreCase("CURRENT_DAY")){
-//            nowDate = DateUtil.today();
-//        }
-//        JSONObject jsonObject = json.getJSONObject("data").getJSONArray("result").getJSONObject(0);
-//        JSONArray jsonArray = json.getJSONObject("data").getJSONArray("result");
-//        for(int i=0;i<jsonArray.size();i++) {
-//            //如果存在时间此时间重合
-//            if(nowDate.equals(jsonArray.getJSONObject(i).getString("date"))){
-//                jsonObject = jsonArray.getJSONObject(i);
-//                break;
-//            }
-//        }
         if(null != response_weather.getRtext() && !response_weather.getRtext().equals("")){
             responseResult.setAsked(response_weather.getRtext());
             responseResult.setSpeech(null);
