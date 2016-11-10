@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,10 +49,9 @@ public class RecomdServiceImpl implements RecomdService {
     @Override
     public List<String> getRecomdList(RecomdInput recomdInput) throws ApiException {
         //对特定用户群，在时间：22：00 - 24：00；心率：60～90次/分   考虑时间跨度，时间设置在22~23
-        Arrays.binarySearch(imeis, recomdInput.getDevice_id());
-        if ( Arrays.binarySearch(imeis, recomdInput.getDevice_id()) != -1
-                && recomdInput.getHeartheat_current() >= 60 && recomdInput.getHeartheat_current() <= 90
-                && DateUtils.getNowHours() >= 22 && DateUtils.getNowHours() <= 23) {
+        //Arrays.binarySearch(imeis, recomdInput.getDevice_id());
+        if (recomdInput.getHeartheat_current() >= 60 && recomdInput.getHeartheat_current() <= 90
+                && DateUtils.getNowHours() >= 21 && DateUtils.getNowHours() <= 22) {
 
             return Context.generateRecmmdList();
         }
