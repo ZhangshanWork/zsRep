@@ -3,13 +3,11 @@ package im.vinci.server.common.exceptions.handler;
 import im.vinci.server.common.exceptions.*;
 import im.vinci.server.common.exceptions.error.ErrorCode;
 import im.vinci.server.common.exceptions.error.ErrorInfo;
-import org.mybatis.spring.MyBatisSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -120,14 +118,6 @@ public class BasicExceptionHandler {
         return new ErrorInfo(exception.getErrorCode(), exception.getErrorMsg(), exception.getErrorMsgToUser());
     }
 
-    @ExceptionHandler(value = {BadSqlGrammarException.class, MyBatisSystemException.class})
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public ErrorInfo handleBadSqlGrammar(BadSqlGrammarException ex) {
-        logger.error(ex.getMessage(), ex);
-        DatabaseException exception = new DatabaseException();
-        return new ErrorInfo(exception.getErrorCode(), exception.getErrorMsg(), exception.getErrorMsgToUser());
-    }
 }
 
 
