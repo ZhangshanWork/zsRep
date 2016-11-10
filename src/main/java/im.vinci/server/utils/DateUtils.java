@@ -207,4 +207,5 @@ public class DateUtils {
         Date date = new Date();
         return date.getHours();
     }
+
 }
