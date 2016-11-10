@@ -16,6 +16,7 @@ public class ContextListener implements ApplicationContextInitializer{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				log.error("==========基础数据初始化发生异常啦============");
-			}
+				throw new RuntimeException(e);
+            }
 	}
 }

@@ -7,7 +7,7 @@ import org.ansj.splitWord.analysis.ToAnalysis;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-public class ClockDecision {
+public class ReminderDecision {
 	private Hashtable<String,Integer> number_list= new Hashtable<String,Integer>();
 	private String[] select_list={"查看","查询","看看"};//enter search situation condition
 	private String[] delete_list={"删除","取消"};//enter cancel situation condition

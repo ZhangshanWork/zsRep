@@ -21,7 +21,10 @@ import java.util.List;
  * 歌曲搜索接口
  */
 @RestController
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(
+        value = {"","/vinci/music"},
+        produces = "application/json;charset=UTF-8"
+)
 public class MusicSearchController {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

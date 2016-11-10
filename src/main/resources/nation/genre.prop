@@ -1,63 +1,45 @@
-hiphopmusic=Hip_Hop
-hiphopsongs=Hip_Hop
-hiphopsongs=Hip_Hop
-ghettosongs=Hip_Hop
-ghettomusic=Hip_Hop
-ghettobeats=Hip_Hop
-songsfromthehood=Hip_Hop
+hiphop=Hip_Hop
+ghetto=Hip_Hop
+thehood=Hip_Hop
 
-popmusic=Pop
-popsongs=Pop
+pop=Pop
 mainstream=Pop
 
 rock=Rock
-rockbeats=Rock
-rockmusic=Rock
 
 indie=Indie/Alternative
 alternative=Indie/Alternative
 
 EDM=EDM/Dance
-dancesongs=EDM/Dance
-dancebeats=EDM/Dance
-dancemusic=EDM/Dance
-ballroomdancingmusic=EDM/Dance
-musicforballroomdancing=EDM/Dance
+dance=EDM/Dance
+ballroomdancing=EDM/Dance
 
 R&B=RnB
 
 country=Country
 
 
-folk=Folk_&A_mericana
-Americana=Folk_&A_mericana
+folk=Folk&Americana
+Americana=Folk&Americana
 
 metal=Metal
 heavymetal=Metal
 
-soulmusic=Soul
-soulbeats=Soul
+soul=Soul
 
 funk=Funk
 
-classicalmusic=Classical
-classicalsongs=Classical
+classical=Classical
 
-jazzsongs=Jazz
-jazzbeats=Jazz
-jazzmusic=Jazz
-bluesmusic=Blues
+jazz=Jazz
 
-latinomusic=Latino
-latinosongs=Latino
+blues=Blues
 
-punksongs=Punk
-punkmusic=Punk
+latino=Latino
+
+punk=Punk
 
 reggae=Reggae
 Jamaican=Reggae
-Caribbeanmusic=Reggae
-Caribbeansongs=Reggae
-Caribbeantunes=Reggae
-Caribbeanjam=Reggae
+Caribbean=Reggae
 

@@ -1,9 +1,5 @@
 partying=Party
 party=Party
-feellikedancing=Party
-fordancing=Party
-dancingmusic=Party
-partymusic=Party
 
 focusing=Focus
 focus=Focus
@@ -12,102 +8,66 @@ reading=Focus
 read=Focus
 studying=Focus
 study=Focus
-studymusic=Focus
 working=Focus
-meeting=Focus
 work=Focus
+meeting=Focus
 
 chilling=Chill
 chill=Chill
-relax=Chill
+relaxing=Chill
 chillax=Chill
 
 eat=Dinner
-dinnertime music=Dinner
+eating=Dinner
 dinner=Dinner
-lunchtimemusic=Dinner
-breakfastmusic=Dinner
 lunch=Dinner
 breakfast=Dinner
+restaurant=Dinner
 
 sleeping=Sleep
 napping=Sleep
 calming=Sleep
 cooldown=Sleep
 soothing=Sleep
-spamusic=Sleep
-naturetunes=Sleep
-naturesounds=Sleep
+nature=Sleep
+naturesourds=Sleep
+spa=Sleep
 
 running=Workout
 jogging=Workout
 run=Workout
 jog=Workout
-workoutmusic=Workout
+exercise=Workout
+exercising=Workout
+workout=Workout
 walking=Workout
-dancing=Workout
-gymmusic=Workout
-exercisingmusic=Workout
-exercisingsongs=Workout
-exercisingbeats=Workout
-exercisingtunes=Workout
+gym=Workout
+sports=Workout
 
 traveling=Travel
+travelling=Travel
 travel=Travel
-on-the-road=Travel
-ontheroad=Travel
-onthebus=Travel
-onthetrain=Travel
-ontheplane=Travel
-ontheairplane=Travel
-
 
 romantic=Romance
-romanticsongs=Romance
-lovesongs=Romance
-romanticmusic=Romance
-lovemusic=Romance
-lovey-doveymusic=Romance
-lovey-doveymood=Romance
-sappysongs=Romance
-sappymusic=Romance
+love=Romance
+nappy=Romance
 
 top=Trending
-trendingmusic=Trending
-trendingsongs=Trending
-trendingbeats=Trending
-what'shot=Trending
-hotsongs=Trending
+trending=Trending
+hot=Trending
 mainstream=Trending
 billboardhits=Trending
-what'snew=Trending
-somethingnew=Trending
+new=Trending
 popular=Trending
 
-
-60smusic=Decades
-70smusic=Decades
-80smusic=Decades
-90smusic=Decades
-60ssongs=Decades
-70ssongs=Decades
-80ssongs=Decades
-90ssongs=Decades
-60sbeats=Decades
-70sbeats=Decades
-80sbeats=Decades
-90sbeats=Decades
 nostalgic=Decades
 reminiscent=Decades
 
-funnysongs=Comedy
-funnybeats=Comedy
-interestingsongs=Comedy
-interestingbeats=Comedy
+funny=Comedy
+interesting=Comedy
 
-kidssongs=Kids
-children'stunes=Kids
 kids=Kids
+children's=Kids
 children=Kids
 
 

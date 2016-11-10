@@ -3,6 +3,8 @@ package im.vinci.server.naturelang.listener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONReader;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import im.vinci.server.naturelang.domain.Genre;
 import im.vinci.server.naturelang.domain.Mood;
 import im.vinci.server.naturelang.domain.OssMusicSong;
@@ -10,95 +12,115 @@ import im.vinci.server.naturelang.service.impl.process.ElasticHandler;
 import im.vinci.server.naturelang.utils.ObjectUtils;
 import im.vinci.server.search.domain.himalayas.HimalayaAlbum;
 import im.vinci.server.search.domain.music.MusicSong;
+import im.vinci.server.utils.StringContentUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Context {
     private static final HashMap<String, Genre> genres = new HashMap<>();
     private static final HashMap<String, OssMusicSong> ossMusics = new HashMap<>();
     private static final HashMap<String, HimalayaAlbum> ossHimalaya = new HashMap<>();
-    private static final Map<String, CaseInsensitiveMap> ctx = new HashMap<>();
-    private static final Map<String, List<String>> whitewords = new HashMap<>();
     private static List<Mood> moods;
-
+    private static final Map<String, CaseInsensitiveMap<String,String>> ctx = new HashMap<>();
     public Context() {
     }
 
     public static void init() throws Exception {
+        loadPropConfigFile(
+                "whitewords","nlp/whitewords.prop",
+                "whitelist","nlp/writelist.prop",
+                "xiamirank","nlp/xiamirank.prop",
+                "allSingers","nlp/xiami_singer.dic",
+                "xiamifilters","nlp/xiamifilters.prop",
+                "himafilters","nlp/xmlyfilters.prop",
+                "rank","nlp/rank.prop",
+                "stop","nlp/stopword.dic",
+                "spoken","nlp/spoken.prop",
+                "nation_prefix","nation/prefix.prop",
+                "nation_scenarios","nation/scenarios.prop",
+                "nation_music_purpose_postfix", "nation/music_purpose_postfix.properties",
+                "nation_machine","nation/machine.prop",
+                "nation_genre","nation/genre.prop",
+                "nation_music_play_purpose_prefix", "nation/music_purpose_prefix.properties",
+                "download_music","nlp/prefix_download_music.dic",
+                "music","nlp/music.prop",
+                "promotion","nlp/promotion.dic",
+                "suffixInstruct","nlp/suffix_instruct.dic", //加载后缀口语词
+                "prefixInstruct","nlp/prefix_instruct.dic", //加载前缀口语词
+                "xunfei","nlp/xunfei.prop",     //判断用户意图是否为询问、聊天
+                "AllMachineInstructor","nlp/instruct.dic",
+                "AllXMLYJudge","nlp/judge.dic",
+                "regex","nlp/regex.prop"        //汇集各类正则，进行过滤
+                );
         loadGenre();
-        loadWhiteWords();
-        loadXiamiRank();
-        loadXiamiFilterConfig();
-        loadHimaFilterConfig();
-        loadRank();
-        loadStop();
-        loadNationGenre1();
-        loadNationMachine();
-        loadNationScenarios();
-        loadNationPrefix();
         loadNationMood();
-        loadSpoken();
-        loadNatioPref();
-        getAllSingers();
-        loadChatWhiteList();
-        loadPromotion();
         loadOss();
-        loadMusicElements();
-        loadDownloadMusicElements();
-        loadXunfeiElements();
         loadHimalaya();
-        loadPrefixInstruct();
-        loadSuffixInstruct();
+
+        processMusicPostfix("nation_scenarios");
+        processMusicPostfix("nation_genre");
+    }
+
+    private static void processMusicPostfix(String keyFile) {
+        CaseInsensitiveMap<String,String> scene = ctx.get(keyFile);
+        CaseInsensitiveMap<String,String> music_purpose_postfix = ctx.get("nation_music_purpose_postfix");
+        CaseInsensitiveMap<String,String> result = new CaseInsensitiveMap<>();
+        for (String word : scene.keySet()) {
+            StrSubstitutor strSubstitutor = new StrSubstitutor(ImmutableMap.of("keyword",word));
+            String sceneName = scene.get(word);
+            for (String postfix : music_purpose_postfix.values()) {
+                String value = StringUtils.deleteWhitespace(strSubstitutor.replace(postfix));
+                result.put(value,sceneName);
+            }
+        }
+        ctx.put(keyFile,result);
+    }
+
+
+    private static void loadPropConfigFile(String... args) throws Exception{
+        if (args == null || args.length %2 != 0) {
+            throw new RuntimeException("load nlp基础数据参数输入错误,参数要是2的倍数");
+        }
+        for (int i=0; i<args.length; i+=2) {
+            String key = args[i];
+            String fileName = args[i+1];
+            CaseInsensitiveMap<String,String> result = new CaseInsensitiveMap<>();
+            Properties properties = new Properties();
+            properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource(fileName)).getInputStream(), "utf8")));
+
+            for (String str : properties.stringPropertyNames()) {
+                result.put(str, properties.getProperty(str,""));
+            }
+
+            ctx.put(key, result);
+        }
     }
 
     public static Genre getGenres(String title) {
-        return (Genre) genres.get(title);
+        return genres.get(title);
     }
 
-    public static void loadXiamiRank() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/xiamirank.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("xiamirank", result);
-    }
 
     public static String getXiamiRankByType(String string) throws Exception {
-        return !StringUtils.isNotBlank(string) ? "music_all" : ((CaseInsensitiveMap) ctx.get("xiamirank")).getOrDefault(string, "music_all") + "";
-    }
-
-    public static void loadWhiteWords() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/whitewords.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", "");
-        }
-        ctx.put("whitewords", result);
+        return !StringUtils.isNotBlank(string) ? "music_all" : ctx.get("xiamirank").getOrDefault(string, "music_all");
     }
 
     public static boolean ifWhiteWords(String name) {
         boolean flag = false;
-        CaseInsensitiveMap result = ctx.get("whitewords");
+        CaseInsensitiveMap<String,String> result = ctx.get("whitewords");
         Iterator iterator = result.keySet().iterator();
-        String temp = "";
+        String temp;
         while (iterator.hasNext()) {
             temp =  (String)iterator.next();
             if (name.equals(temp)) {
@@ -110,29 +132,6 @@ public class Context {
     }
 
 
-    public static void loadGenre() throws IOException {
-        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/localRecommend.json")).getInputStream(), "utf8")));
-        List<Genre> list = JSON.parseObject(reader.readString(), new TypeReference<List<Genre>>() {
-        });
-        Iterator var2 = list.iterator();
-
-        while (var2.hasNext()) {
-            Genre genre = (Genre) var2.next();
-            genres.put(genre.getPlaylistname(), genre);
-        }
-    }
-
-    public static void loadOss() throws IOException {
-        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/oss.json")).getInputStream(), "utf8")));
-        List<OssMusicSong> list = JSON.parseObject(reader.readString(), new TypeReference<List<OssMusicSong>>() {
-        });
-        Iterator var2 = list.iterator();
-
-        while (var2.hasNext()) {
-            OssMusicSong ossMusicSong = (OssMusicSong) var2.next();
-            ossMusics.put(ossMusicSong.getCatalog(), ossMusicSong);
-        }
-    }
 
     /**
      * 定时定向推送
@@ -156,15 +155,6 @@ public class Context {
         return ids;
     }
 
-    /**
-     *
-     * @return
-     */
-    public static List<MusicSong> getWhiteNoise() {
-        List<MusicSong> ossMusicSong = ossMusics.get("whitenoise").getMusics();
-        Collections.shuffle(ossMusicSong);
-        return ossMusicSong;
-    }
 
    /* *//**
      * 判断当前歌手是否包含在oss中
@@ -177,29 +167,14 @@ public class Context {
         }
     }*/
 
-    /**
-     * @apiNote 加载喜马拉雅外语资源
-     * */
-    public static void loadHimalaya() throws IOException {
-        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/himalaya.json")).getInputStream(), "utf8")));
-        List<HimalayaAlbum> list = JSON.parseObject(reader.readString(), new TypeReference<List<HimalayaAlbum>>() {
-        });
-        Iterator var2 = list.iterator();
-
-        while (var2.hasNext()) {
-            HimalayaAlbum ossHima = (HimalayaAlbum) var2.next();
-            ossHimalaya.put(ossHima.getId()+"", ossHima);
-        }
-    }
 
     /**
      * @param id  oss中的歌曲id
      * 通过歌曲id，获取对应的曲库信息
      * */
     public static MusicSong getSongByIdInOss(Long id) {
-        Iterator<OssMusicSong> iterator = ossMusics.values().iterator();
-        while (iterator.hasNext()) {
-            List<MusicSong> musicSongList = iterator.next().getMusics();
+        for (OssMusicSong ossMusicSong : ossMusics.values()) {
+            List<MusicSong> musicSongList = ossMusicSong.getMusics();
             for (MusicSong temp : musicSongList) {
                 if (id == temp.getSong_id()) {
                     return temp;
@@ -219,28 +194,17 @@ public class Context {
         if (null != ossMusics.get(catalog)) {
             return ossMusics.get(catalog).getMusics();
         } else {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
     }
 
 
     public static List<MusicSong> getGenreName(String name) {
-        return ((Genre) genres.get(name)).getMusics();
+        return (genres.get(name)).getMusics();
     }
 
-    public static void getAllSingers() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/xiami_singer.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-        ctx.put("allSingers", result);
-    }
 
     public static boolean IfSinger(String str) throws IOException {
         if (StringUtils.isEmpty(str)) {
@@ -258,10 +222,10 @@ public class Context {
     public static String getSingerInlang(String lang) {
         lang = lang.trim();
         List<String> list = new ArrayList<>();
-        Map properties = ctx.get("allSingers");
+        CaseInsensitiveMap<String,String> properties = ctx.get("allSingers");
         Set<String> set = properties.keySet();
         for (String str : set) {
-            if (str.matches("[a-zA-Z_ ]+")&&lang.matches("[a-zA-Z0-9 ]+[的]{0,1}[a-zA-Z0-9 ]+[的歌]{0,1}")||lang.matches("[a-zA-Z_ ]+")) {
+            if (str.matches("[a-zA-Z_ ]+")&&lang.matches("[a-zA-Z0-9 ]+[的]?[a-zA-Z0-9 ]+[的歌]?")||lang.matches("[a-zA-Z_ ]+")) {
                 lang = lang.replace("的歌","");
                 if (lang.contains("的")) {
                     String[] array = lang.split("的");
@@ -282,7 +246,7 @@ public class Context {
 
 
     public static boolean IfSingerInLang(String str) throws IOException {
-        Map properties = ctx.get("allSingers");
+        CaseInsensitiveMap<String,String> properties = ctx.get("allSingers");
         if (StringUtils.isEmpty(str)) {
             return false;
         } else if(str.matches("[a-zA-Z_]+")){
@@ -290,8 +254,8 @@ public class Context {
                     return true;
                 }
         } else{
-            Set<String> set = properties.keySet();
-           /* for (String temp : set) {
+           /* Set<String> set = properties.keySet();
+            for (String temp : set) {
                     if (str.contains(temp)) {
                             return true;
                     }
@@ -303,82 +267,50 @@ public class Context {
         return false;
     }
 
-    public static Properties getAllMachineInstructor() throws IOException {
-        new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/instruct.dic")).getInputStream(), "utf8")));
-        return properties;
-    }
 
     public static boolean IfMachineInstruct(String str) throws IOException {
-        Properties properties = getAllMachineInstructor();
-        Set set = properties.keySet();
-        Iterator var3 = set.iterator();
 
-        String obj1;
+        CaseInsensitiveMap<String,String> properties = ctx.get("AllMachineInstructor");
+        Iterator<String> var3 = properties.keySet().iterator();
+
+        String obj;
         do {
             if (!var3.hasNext()) {
                 return false;
             }
-
-            Object obj = var3.next();
-            obj1 = obj + "";
-        } while (!obj1.contains(str) && !str.contains(obj1));
+            obj = var3.next();
+        } while (!obj.contains(str) && !str.contains(obj));
 
         return true;
-    }
-
-    public static Properties getAllXMLYJudge() throws IOException {
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/judge.dic")).getInputStream(), "utf8")));
-        return properties;
     }
 
     public static boolean IfXMLYJudege(String str) throws IOException {
-        Properties properties = getAllXMLYJudge();
-        Set set = properties.keySet();
-        Iterator var3 = set.iterator();
+        CaseInsensitiveMap<String,String> properties = ctx.get("AllXMLYJudge");
 
-        String obj1;
+        Iterator<String> var3 = properties.keySet().iterator();
+
+        String obj;
         do {
             if (!var3.hasNext()) {
                 return false;
             }
-
-            Object obj = var3.next();
-            obj1 = obj + "";
-        } while (!obj1.contains(str) && !str.contains(obj1));
+            obj = var3.next();
+        } while (!obj.contains(str) && !str.contains(obj));
 
         return true;
     }
 
-    public static void loadXiamiFilterConfig() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/xiamifilters.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("xiamifilters", result);
-    }
 
     public static String filterXiamiLang(String lang) throws IOException {
         if (StringUtils.isEmpty(lang)) {
             return "";
         } else {
-            CaseInsensitiveMap properties = (CaseInsensitiveMap) ctx.get("xiamifilters");
-            Set objects = properties.keySet();
-            Iterator var3 = objects.iterator();
+            CaseInsensitiveMap<String,String> properties = ctx.get("xiamifilters");
 
-            while (var3.hasNext()) {
-                Object obj = var3.next();
-                String temp = obj + "";
-                if (lang.contains(obj + "")) {
-                    lang = lang.replace(temp, properties.get(temp) + " ");
+            for (String obj : properties.keySet()) {
+                if (lang.contains(obj)) {
+                    lang = lang.replace(obj, properties.get(obj) + " ");
                 }
             }
 
@@ -386,33 +318,16 @@ public class Context {
         }
     }
 
-    public static void loadHimaFilterConfig() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/xmlyfilters.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("himafilters", result);
-    }
 
     public static String filterHimaLang(String lang) throws IOException {
         if (StringUtils.isEmpty(lang)) {
             return "";
         } else {
-            Map properties = (Map) ctx.get("himafilters");
-            Set objects = properties.keySet();
-            Iterator var3 = objects.iterator();
+            CaseInsensitiveMap<String,String> properties = ctx.get("himafilters");
 
-            while (var3.hasNext()) {
-                Object obj = var3.next();
-                String temp = obj + "";
-                if (lang.contains(obj + "")) {
-                    lang = lang.replace(temp, properties.get(temp) + "");
+            for (String obj : properties.keySet()) {
+                if (lang.contains(obj)) {
+                    lang = lang.replace(obj, properties.get(obj));
                 }
             }
 
@@ -420,37 +335,21 @@ public class Context {
         }
     }
 
-    public static void loadRank() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/rank.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("rank", result);
-    }
 
     public static boolean ifRank(String lang) {
         if (StringUtils.isEmpty(lang)) {
             return false;
         } else {
-            CaseInsensitiveMap properties = (CaseInsensitiveMap) ctx.get("rank");
-            Set objects = properties.keySet();
-            Iterator var3 = objects.iterator();
+            CaseInsensitiveMap<String,String> properties = ctx.get("rank");
+            Iterator<String> var3 = properties.keySet().iterator();
 
-            Object obj;
+            String obj;
             do {
                 if (!var3.hasNext()) {
                     return false;
                 }
-
                 obj = var3.next();
-                String temp = obj + "";
-            } while (!lang.contains(obj + ""));
+            } while (!lang.contains(obj));
 
             return true;
         }
@@ -460,8 +359,8 @@ public class Context {
         if (CollectionUtils.isEmpty(lang)) {
             return "";
         } else {
-            CaseInsensitiveMap properties = (CaseInsensitiveMap) ctx.get("rank");
-            Iterator var2 = lang.iterator();
+            CaseInsensitiveMap<String,String> properties = ctx.get("rank");
+            Iterator<String> var2 = lang.iterator();
 
             String obj;
             do {
@@ -469,146 +368,56 @@ public class Context {
                     return "";
                 }
 
-                obj = (String) var2.next();
+                obj = var2.next();
             }
-            while (!ObjectUtils.isNotEmperty(properties.get(obj)) || !StringUtils.isNotBlank(properties.get(obj) + ""));
+            while (!ObjectUtils.isNotEmperty(properties.get(obj)) || !StringUtils.isNotBlank(properties.get(obj)));
 
-            return properties.get(obj) + "";
+            return properties.get(obj);
         }
     }
 
-    public static void loadStop() throws UnsupportedEncodingException, IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/stopword.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("stop", result);
-    }
 
     public static boolean ifStopWord(String word) throws IOException {
         if (StringUtils.isEmpty(word)) {
             return false;
         } else {
-            CaseInsensitiveMap properties = (CaseInsensitiveMap) ctx.get("stop");
-            return StringUtils.isNotBlank(properties.get(word) + "");
+            CaseInsensitiveMap<String,String> properties = ctx.get("stop");
+            return StringUtils.isNotBlank(properties.get(word));
         }
     }
 
-    public static void loadNationGenre1() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/genre.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
 
-        ctx.put("nation_genre1", result);
-    }
+    /**
+     * 识别是否有play music类的前缀,并去掉前缀和改为小写
+     * @return 有前缀返回后面的,没有前缀返回原字串的小写
+     */
+    private static Pair<Boolean,String> judgePlayMusicAndCutPrefixLowerCase(String lang) {
+        CaseInsensitiveMap<String,String> musicPlayPrefix = ctx.get("nation_music_play_purpose_prefix");
 
-    public static void loadNationMachine() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/machine.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("nation_machine", result);
-    }
-
-    public static void loadNationScenarios() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/scenarios.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("nation_scenarios", result);
-    }
-
-    public static void loadNationPrefix() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/prefix.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("nation_prefix", result);
-    }
-
-    public static void loadSpoken() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/spoken.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("spoken", result);
-    }
-
-    public static void loadNationMood() throws Exception {
-        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/mood.json")).getInputStream(), "utf8")));
-        List<Mood> moods1 = JSON.parseObject(reader.readString(), new TypeReference<List<Mood>>() {
-        });
-        Iterator var2 = moods1.iterator();
-
-        while (var2.hasNext()) {
-            Mood mood = (Mood) var2.next();
-            mood.setMoods(Arrays.asList(mood.getKeywords().split(";")));
-            mood.setSongList(Arrays.asList(mood.getSongs().split(";")));
-        }
-
-        moods = moods1;
-    }
-
-    public static List fetchNationMood(String lang) throws Exception {
-        if (!StringUtils.isNotBlank(lang)) {
-            return null;
-        } else {
-            Iterator var1 = moods.iterator();
-
-            Mood mood;
-            do {
-                if (!var1.hasNext()) {
-                    return null;
+        lang = lang.toLowerCase().trim();
+        String bestPrefix = "";
+        for (String prefix : musicPlayPrefix.values()) {
+            if (lang.startsWith(prefix)) {
+                if (prefix.length() > bestPrefix.length()) {
+                    bestPrefix = prefix;
                 }
-
-                mood = (Mood) var1.next();
-            } while (!mood.getKeywords().replace(" ", "").toLowerCase().contains(lang.toLowerCase()));
-
-            return mood.getSongList();
+            }
         }
+        if (bestPrefix.length() > 0) {
+            lang = lang.substring(bestPrefix.length()).trim();
+            return Pair.of(true,lang);
+        }
+        return Pair.of(false,lang);
     }
 
     public static String fetchNationScenarios(String lang) throws Exception {
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("nation_scenarios");
-        Set set = result.keySet();
-        Iterator var4 = list.iterator();
+        lang = judgePlayMusicAndCutPrefixLowerCase(lang).getRight();
+
+        ArrayList<String> list = (new ElasticHandler()).cut(StringUtils.deleteWhitespace(lang), true);
+        CaseInsensitiveMap<String,String> result = ctx.get("nation_scenarios");
+        Iterator<String> var4 = list.iterator();
 
         String str;
         do {
@@ -616,53 +425,88 @@ public class Context {
                 return "";
             }
 
-            str = (String) var4.next();
+            str = var4.next();
         } while (!result.containsKey(str));
 
-        return result.get(str) + "";
+        return StringUtils.replace(result.getOrDefault(str,""),"_","");
     }
+
+    public static String fetchNationGenre(String lang) throws Exception {
+        lang = judgePlayMusicAndCutPrefixLowerCase(lang).getRight();
+
+        ArrayList<String> list = (new ElasticHandler()).cut(StringUtils.deleteWhitespace(lang), true);
+        CaseInsensitiveMap<String,String> result = ctx.get("nation_genre");
+        Iterator<String> var4 = list.iterator();
+
+        String str;
+        do {
+            if (!var4.hasNext()) {
+                return "";
+            }
+
+            str = var4.next();
+        } while (!result.containsKey(str));
+
+        return StringUtils.replace(result.getOrDefault(str,""),"_"," ");
+    }
+
+    public static Mood fetchNationMood(String lang) throws Exception {
+        if (StringUtils.isBlank(lang)) {
+            return null;
+        }
+        String playPurposeLang = judgePlayMusicAndCutPrefixLowerCase(lang).getRight();
+        String langWithoutSpace = StringContentUtils.deleteWhiteSpaceAndOtherSignAndToLowerCase(lang);
+
+        for (Mood mood : moods) {
+            for (String key : mood.getSpecial_word().keySet()) {
+                double score = StringUtils.getJaroWinklerDistance(key,langWithoutSpace);
+                if (score > 0.9) {
+                    Mood result = new Mood();
+                    result.setMood(mood.getMood());
+                    result.setAnswer(mood.getSpecial_word().get(key));
+                    result.setSongs(mood.getSongs());
+                    return result;
+                }
+            }
+            if (StringUtils.isBlank(playPurposeLang)) {
+                continue;
+            }
+            for (String key : mood.getKeywords()) {
+                double score = StringUtils.getJaroWinklerDistance(key, playPurposeLang);
+                if (score > 0.9) {
+                    Mood result = new Mood();
+                    result.setMood(mood.getMood());
+                    result.setSongs(mood.getSongs());
+                    return result;
+                }
+            }
+        }
+
+        return null;
+
+//
+//            Mood mood;
+//            do {
+//                if (!var1.hasNext()) {
+//                    return Collections.emptyList();
+//                }
+//
+//                mood = var1.next();
+//            } while (!mood.getKeywords().replace(" ", "").toLowerCase().contains(lang.toLowerCase()));
+//
+//            return mood.getSongList();
+    }
+
 
     public static String fetchNationMachine(String lang) throws Exception {
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("nation_machine");
-        Set set = result.keySet();
-        Iterator var4 = list.iterator();
-
-        String str;
-        do {
-            if (!var4.hasNext()) {
-                return "";
-            }
-
-            str = (String) var4.next();
-        } while (!result.containsKey(str));
-
-        return result.get(str) + "";
-    }
-
-    public static String fetchNationGerne(String lang) throws Exception {
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("nation_genre1");
-        Set set = result.keySet();
-        Iterator var4 = list.iterator();
-
-        String str;
-        do {
-            if (!var4.hasNext()) {
-                return "";
-            }
-
-            str = (String) var4.next();
-        } while (!result.containsKey(str));
-
-        return result.get(str) + "";
+        CaseInsensitiveMap<String,String> result = ctx.get("nation_machine");
+        return result.getOrDefault(StringContentUtils.deleteWhiteSpaceAndOtherSignAndToLowerCase(lang),"");
     }
 
     public static String fetchSpoken(String lang) throws Exception {
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("spoken");
-        Set set = result.keySet();
-        Iterator var4 = list.iterator();
+        ArrayList<String> list = (new ElasticHandler()).cut(lang, true);
+        CaseInsensitiveMap<String,String> result = ctx.get("spoken");
+        Iterator<String> var4 = list.iterator();
 
         String str;
         do {
@@ -670,17 +514,16 @@ public class Context {
                 return "";
             }
 
-            str = (String) var4.next();
+            str = var4.next();
         } while (!result.containsKey(str));
 
-        return result.get(str) + "";
+        return result.get(str);
     }
 
     public static boolean ifSpoken(String lang) throws Exception {
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("spoken");
-        Set set = result.keySet();
-        Iterator var4 = list.iterator();
+        ArrayList<String> list = (new ElasticHandler()).cut(lang, true);
+        CaseInsensitiveMap<String,String> result = ctx.get("spoken");
+        Iterator<String> var4 = list.iterator();
 
         String str;
         do {
@@ -688,33 +531,17 @@ public class Context {
                 return false;
             }
 
-            str = (String) var4.next();
+            str = var4.next();
         } while (!result.containsKey(str));
 
         return true;
     }
 
-    public static void loadNatioPref() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/prefix.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("nation_prefix", result);
-    }
-
     public static String filterNationPref(String enLang) throws IOException {
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("nation_prefix");
-        ArrayList list = (new ElasticHandler()).cut(enLang, true);
-        Iterator var3 = list.iterator();
+        CaseInsensitiveMap<String,String> result = ctx.get("nation_prefix");
+        ArrayList<String> list = (new ElasticHandler()).cut(enLang, true);
 
-        while (var3.hasNext()) {
-            String str = (String) var3.next();
+        for (String str : list) {
             if (result.containsKey(str)) {
                 enLang = enLang.replace(str, "");
             }
@@ -724,28 +551,14 @@ public class Context {
     }
 
 
-    public static void loadChatWhiteList() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/writelist.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("whitelist", result);
-    }
 
     public static Boolean ifWhite(String lang) throws IOException {
         boolean flag = false;
-        CaseInsensitiveMap result = (CaseInsensitiveMap) ctx.get("whitelist");
-        ArrayList list = (new ElasticHandler()).cut(lang, true);
-        Iterator var3 = list.iterator();
+        CaseInsensitiveMap<String,String> result = ctx.get("whitelist");
+        ArrayList<String> list = (new ElasticHandler()).cut(lang, true);
 
-        while (var3.hasNext()) {
-            String str = (String) var3.next();
+        for (String str : list) {
             if (result.containsKey(str)) {
                 flag = true;
                 break;
@@ -756,50 +569,6 @@ public class Context {
     }
 
 
-    public static void loadPromotion() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/promotion.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("promotion", result);
-    }
-
-    //判断用户的意图是否为音乐点播
-    public static void loadMusicElements() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/music.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("music", result);
-    }
-
-
-    //判断用户的意图是否为音乐下载
-    public static void loadDownloadMusicElements() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/prefix_download_music.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("download_music", result);
-    }
 
     /**
      * //判断用户的意图是否为音乐点播
@@ -809,7 +578,7 @@ public class Context {
      */
     public static int ifMusicInstruct(String lang) throws Exception{
         int flag = 0;//默认为非音乐指令信息
-        CaseInsensitiveMap map = ctx.get("music");
+        CaseInsensitiveMap<String,String> map = ctx.get("music");
         Set<String> set = map.keySet();
         for (String str : set) {
             if (lang.matches(str)){
@@ -820,33 +589,18 @@ public class Context {
         if (flag > 0) {
             return flag;
         }
-        map = ctx.get("download_music");
+        //暂时去掉download的理解
+/*        map = ctx.get("download_music");
         set = map.keySet();
         for (String str : set) {
             if (lang.matches(str)){
                 flag = 2;
                 break;
             }
-        }
+        }*/
         return flag;
     }
 
-
-
-    //判断用户意图是否为询问、聊天
-    public static void loadXunfeiElements() throws Exception {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/xunfei.prop")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
-
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-
-        ctx.put("xunfei", result);
-    }
 
     /**
      * 判断用户意图是否为询问、聊天
@@ -856,7 +610,10 @@ public class Context {
      * */
     public static boolean ifXunfeiOrMusic(String type,String lang) {
         boolean flag = false;
-        CaseInsensitiveMap result =  ctx.get(type);
+        CaseInsensitiveMap<String,String> result =  ctx.get(type);
+        if (result == null) {
+            return false;
+        }
         Set<String> set = result.keySet();
         for (String str : set) {
             if (lang.matches(str)) {
@@ -876,19 +633,7 @@ public class Context {
         return list.get((int) (Math.random() * size)) + "";
     }
 
-    //加载前缀口语词
-    public static void loadPrefixInstruct() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/prefix_instruct.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-        ctx.put("prefixInstruct", result);
-    }
     //判定并消除前缀口语词
     public static String filterPrefixInstruct(String str) throws IOException {
         List<String> list = new ArrayList<>();
@@ -899,7 +644,7 @@ public class Context {
                 str = str.replace(" ","_");
             }
 
-            Map properties = ctx.get("prefixInstruct");
+            CaseInsensitiveMap<String,String> properties = ctx.get("prefixInstruct");
             Set<String> set =  properties.keySet();
             for (String temp : set) {
                 if (str.startsWith(temp)) {
@@ -928,19 +673,7 @@ public class Context {
     }
 
 
-    //加载后缀口语词
-    public static void loadSuffixInstruct() throws IOException {
-        CaseInsensitiveMap result = new CaseInsensitiveMap();
-        Properties properties = new Properties();
-        properties.load(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/suffix_instruct.dic")).getInputStream(), "utf8")));
-        Iterator var2 = properties.keySet().iterator();
 
-        while (var2.hasNext()) {
-            Object str = var2.next();
-            result.put(str + "", properties.getProperty(str + ""));
-        }
-        ctx.put("suffixInstruct", result);
-    }
     //判定并消除后缀口语词
     public static String filterSuffixInstruct(String str) throws IOException {
         String bak = str;
@@ -952,7 +685,7 @@ public class Context {
                 str = str.replace(" ","_");
             }
 
-            Map properties = ctx.get("suffixInstruct");
+            CaseInsensitiveMap<String,String> properties = ctx.get("suffixInstruct");
             Set<String> set =  properties.keySet();
             for (String temp : set) {
                 if (str.endsWith(temp)) {
@@ -986,5 +719,104 @@ public class Context {
         return lang;
     }
 
+    /**
+     *
+     * @return
+     */
+    public static List<MusicSong> getWhiteNoise() {
+        List<MusicSong> ossMusicSong = ossMusics.get("whitenoise").getMusics();
+        Collections.shuffle(ossMusicSong);
+        return ossMusicSong;
+    }
+
+    // ------------------------------------- private load config file -----------------------------
+
+    /**
+     * @apiNote 加载喜马拉雅外语资源
+     * */
+    private static void loadHimalaya() throws IOException {
+        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/himalaya.json")).getInputStream(), "utf8")));
+        List<HimalayaAlbum> list = JSON.parseObject(reader.readString(), new TypeReference<List<HimalayaAlbum>>() {
+        });
+
+        for (HimalayaAlbum ossHima : list) {
+            ossHimalaya.put(ossHima.getId() + "", ossHima);
+        }
+    }
+    private static void loadGenre() throws IOException {
+        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/localRecommend.json")).getInputStream(), "utf8")));
+        List<Genre> list = JSON.parseObject(reader.readString(), new TypeReference<List<Genre>>() {
+        });
+
+        for (Genre genre : list) {
+            genres.put(genre.getPlaylistname(), genre);
+        }
+    }
+
+    private static void loadOss() throws IOException {
+        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nlp/oss.json")).getInputStream(), "utf8")));
+        List<OssMusicSong> list = JSON.parseObject(reader.readString(), new TypeReference<List<OssMusicSong>>() {
+        });
+
+        for (OssMusicSong ossMusicSong : list) {
+            ossMusics.put(ossMusicSong.getCatalog(), ossMusicSong);
+        }
+    }
+    private static void loadNationMood() throws Exception {
+        JSONReader reader = new JSONReader(new BufferedReader(new InputStreamReader((new ClassPathResource("nation/mood.json")).getInputStream(), "utf8")));
+        moods = JSON.parseObject(reader.readString(), new TypeReference<List<Mood>>() {
+        });
+
+        CaseInsensitiveMap<String,String> music_purpose_postfix = ctx.get("nation_music_purpose_postfix");
+        for (Mood mood : moods) {
+            List<String> result = Lists.newArrayList();
+            for (String word : mood.getKeywords()) {
+                StrSubstitutor strSubstitutor = new StrSubstitutor(ImmutableMap.of("keyword", word));
+                for (String postfix : music_purpose_postfix.values()) {
+                    String value = StringUtils.deleteWhitespace(strSubstitutor.replace(postfix));
+                    result.add(value);
+                }
+            }
+            mood.setKeywords(result);
+
+            CaseInsensitiveMap<String,String> sentence = new CaseInsensitiveMap<>();
+            for (Map.Entry<String,String> entry: mood.getSpecial_word().entrySet()) {
+                String question = entry.getKey();
+                sentence.put(StringContentUtils.deleteWhiteSpaceAndOtherSignAndToLowerCase(question),entry.getValue());
+            }
+            mood.setSpecial_word(sentence);
+        }
+    }
+
+    /**
+     * 判断lang是否契合指定的regex（具体内容在regex.prop）
+     * @param lang
+     * @param regex
+     * @return
+     */
+    public static boolean ifMatchRegex(String lang, String regex) {
+        if(StringUtils.isNotBlank(matchRegexResult(lang, regex))){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获取匹配的结果（具体内容在regex.prop）
+     * @param lang
+     * @param regex
+     * @return
+     */
+    private static String matchRegexResult(String lang, String regex) {
+        String result = "";
+        CaseInsensitiveMap<String,String> map = ctx.get("regex");
+        String expression = map.get(regex);
+        Pattern pattern = Pattern.compile(expression);
+        Matcher matcher = pattern.matcher(lang);
+        while (matcher.find()) {
+            result = matcher.group();
+        }
+        return result;
+    }
 
 }

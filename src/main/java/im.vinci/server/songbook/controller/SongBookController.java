@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(
-        value = {"/vinci/songbook"},
+        value = {"/vinci/songbook","/vinci/music"},
         produces = {"application/json;charset=UTF-8"}
 )
 public class SongBookController {

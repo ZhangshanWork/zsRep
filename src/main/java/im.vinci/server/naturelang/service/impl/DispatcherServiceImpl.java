@@ -3,7 +3,7 @@ package im.vinci.server.naturelang.service.impl;
 import im.vinci.server.naturelang.domain.ServiceRet;
 import im.vinci.server.naturelang.listener.Context;
 import im.vinci.server.naturelang.service.DispatcherService;
-import im.vinci.server.naturelang.service.decision.ClockDecision;
+import im.vinci.server.naturelang.service.decision.ReminderDecision;
 import im.vinci.server.naturelang.service.decision.PmDecision;
 import im.vinci.server.naturelang.service.decision.RecordDecision;
 import im.vinci.server.naturelang.service.decision.WeatherDecision;
@@ -49,7 +49,11 @@ public class DispatcherServiceImpl implements DispatcherService {
             return serviceRet;
         }
         //录音服务判定
-        serviceRet = new ClockDecision().service_check(query);
+        serviceRet = new ReminderDecision().service_check(query);
+        if(StringUtils.isNotBlank(serviceRet.getService())){
+            return serviceRet;
+        }
+        serviceRet = ifMusicDownloadPlayer(query);
         if(StringUtils.isNotBlank(serviceRet.getService())){
             return serviceRet;
         }
@@ -69,6 +73,24 @@ public class DispatcherServiceImpl implements DispatcherService {
         return new ServiceRet();
     }
 
+    /**
+     * 判定是否为播放下载歌曲的指令
+     * @param query
+     * @return
+     * @throws Exception
+     */
+    public ServiceRet ifMusicDownloadPlayer(String query) throws Exception {
+        ServiceRet serviceRet = new ServiceRet();
+        int flag = Context.ifMusicInstruct(query);
+        boolean flag1 = Context.ifMatchRegex(query, "download");
+        if (flag == 1 && flag1) {
+            serviceRet.setRc(0);
+            serviceRet.setService("machine");
+            serviceRet.setOperation("download");
+        }
+        return serviceRet;
+    }
+
     //判定是否为音乐意向
     public ServiceRet ifMedia(String query) throws Exception {
         ServiceRet serviceRet = new ServiceRet();
@@ -86,7 +108,4 @@ public class DispatcherServiceImpl implements DispatcherService {
         }
         return serviceRet;
     }
-
-
-
 }

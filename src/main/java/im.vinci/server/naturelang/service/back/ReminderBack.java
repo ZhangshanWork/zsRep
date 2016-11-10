@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import im.vinci.server.naturelang.domain.Parameter;
 import im.vinci.server.naturelang.domain.Response;
-import im.vinci.server.naturelang.service.decision.ClockDecision;
+import im.vinci.server.naturelang.service.decision.ReminderDecision;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -108,7 +108,7 @@ public class ReminderBack {
         this.msg = numberExchange(this.msg);
         this.message = msg;
         //check if he want to search clock
-        ClockDecision cc = new ClockDecision();
+        ReminderDecision cc = new ReminderDecision();
         String operation = cc.service_check(this.msg).getOperation();
         if(operation.equals("VIEW")){
             this.response.setOperation("VIEW");

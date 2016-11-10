@@ -24,7 +24,7 @@ public class NatureLangServiceImpl implements NatureLangService {
 
 	@Resource(name = "esClient")
 	private Client client;
-	
+
 	private static DefaultTaobaoClient tclient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest"
 			, "23064829", "29ed3de5990627239d0fdbddd3e94b51", "json", 500000, 500000);
 
