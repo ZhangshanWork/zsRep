@@ -590,14 +590,14 @@ public class Context {
             return flag;
         }
         //暂时去掉download的理解
-/*        map = ctx.get("download_music");
+        map = ctx.get("download_music");
         set = map.keySet();
         for (String str : set) {
             if (lang.matches(str)){
                 flag = 2;
                 break;
             }
-        }*/
+        }
         return flag;
     }
 
