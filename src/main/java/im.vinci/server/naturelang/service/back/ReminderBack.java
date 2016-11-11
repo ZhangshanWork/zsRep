@@ -645,16 +645,21 @@ public class ReminderBack {
     }
     private int getAfterTime(String msg){
         int number=0;
-        Pattern p = Pattern.compile("\\d{1,2}个半小时");
+        Pattern p = Pattern.compile("\\d{1,2}个半小时[以后|后]");
         Matcher m = p.matcher(msg);
         if(m.find()){
             this.message = this.message.replace(msg.substring(m.start(),m.end()), " ");
             number=Integer.parseInt(msg.substring(m.start(),m.end()-4))*60+30;
         }
         else{
-            p = Pattern.compile("半个+小时");
+            p = Pattern.compile("半个?小时[以后|后]");
             m = p.matcher(msg);
-            if(m.find()){
+            boolean flag = false;
+            while (m.find()) {
+                flag = true;
+                break;
+            }
+            if(flag){
                 this.message = this.message.replace(msg.substring(m.start(),m.end()), " ");
                 number = 30;
             }
@@ -875,8 +880,8 @@ public class ReminderBack {
             this.dt = this.dt.plusHours(12);
         }
         else if(this.dt.getHourOfDay()<12 && !msg.contains("早上") && !msg.contains("上午") && !msg.contains("凌晨")){
-            this.response.setRtext("请问是上午还是下午");
-            return;
+            /*this.response.setRtext("请问是上午还是下午");
+            return;*/
 
         }
         if(advance[0]>0||advance[1]>0){
@@ -1008,7 +1013,7 @@ public class ReminderBack {
             }
             return message;
         }
-        p = Pattern.compile("(第\\d个)|(下1(次|个))|(最近1(个|次))|(设置)|(提前)|(记得)|新建|(通知)|(查看)|(查询)|(删除)|(取消)|(专心)|(专注)|(静下心)|(定时*)|(提醒)|(闹钟)|(闹铃)|(叫醒)|(叫)|(提示)|(的)|((给|帮)*我)|(定*1个+)|(下周\\d+)|(下下周\\d+)|(每周\\d)|(每天)|(周末)|(工作日)|(周\\d)|(\\d{1,2}月\\d{1,2}(日|号))|(\\d{1,2}(日|号))|(下个+月)|(下下个+月)|(明天)|(后天)|(大后天)|(外天)|(今天)|(早上)|(凌晨)|(中午)|(上午)|(下午)|(晚上)|(半夜)|(要)|(\\d{1,2}点\\d{1,2}(分*|刻))|(\\d{1,2}分钟)|(\\d{1,2}点(钟|半))|(\\d{1,2}点)|(1刻钟+)|(\\d{1,2}个*(小时|点)半*)|(((\\d{1,2})|半)个*半小时)|(\\d{1,2}分钟+)|(\\D{0,2}后)");
+        p = Pattern.compile("(第\\d个)|(下1(次|个))|(最近1(个|次))|(设置)|(提前)|(记得)|新建|(通知)|(查看)|(查询)|(删除)|(取消)|(专心)|(专注)|(静下心)|(定时*)|(提醒)|(闹钟)|(闹铃)|(叫醒)|(叫)|(提示)|(的)|((给|帮)*我)|(定*1个+)|(下周\\d+)|(下下周\\d+)|(每周\\d)|(每天)|(周末)|(工作日)|(周\\d)|(\\d{1,2}月\\d{1,2}(日|号))|(\\d{1,2}(日|号))|(下个+月)|(下下个+月)|(明天)|(后天)|(大后天)|(外天)|(今天)|(早上)|(凌晨)|(中午)|(上午)|(下午)|(晚上)|(半夜)|(要)|(\\d{1,2}点\\d{1,2}(分*|刻))|(\\d{1,2}分钟)|(\\d{1,2}点(钟|半))|(\\d{1,2}点)|(1刻钟+)|(\\d{1,2}个*(小时|点)半*)|(((\\d{1,2})|半)个*小时)|(\\d{1,2}分钟+)|(\\D{0,2}后)");
         m = p.matcher(msg);
         message = msg;
         while(m.find()){

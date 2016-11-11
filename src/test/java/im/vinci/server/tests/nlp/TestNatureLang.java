@@ -454,6 +454,19 @@ public class TestNatureLang {
         }
     }
 
+    @Test
+    public void testRegular1() {
+        String regex = "半个?小时[以后|后]";
+        String msg = "半个小时后提醒我";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(msg);
+        while (m.find()) {
+            System.out.println(m.group());
+        }
+    }
+
+
+
     public static void main(String[] args) {
         //定义正则表达式。这个正则表达式用来提取IP地址和访问时间
         String regex = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s-\\s-\\s\\[([^\\]]+)\\]";
