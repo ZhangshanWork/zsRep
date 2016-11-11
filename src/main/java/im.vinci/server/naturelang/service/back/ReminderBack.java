@@ -1393,8 +1393,8 @@ public class ReminderBack {
                 hour[1]=hour[1]+12;
             }
             else if(hour[1]<12 && !msg.contains("早上") && !msg.contains("上午") && !msg.contains("凌晨")){
-                this.response.setRtext("请问是上午还是下午");
-                hour[0]=-1;
+               /* this.response.setRtext("请问是上午还是下午");
+                hour[0]=-1;*/
                 return hour;
 
             }
