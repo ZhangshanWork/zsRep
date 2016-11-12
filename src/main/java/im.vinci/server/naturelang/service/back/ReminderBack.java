@@ -1108,7 +1108,7 @@ public class ReminderBack {
                     }
                     else{
                         this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-                        response.getSemantic().getSlots().getDatetime().setDuration(3600000);
+                        response.getSemantic().getSlots().getDatetime().setDuration(0);
                     }
 
                     p = Pattern.compile("第\\d个");
@@ -1224,7 +1224,7 @@ public class ReminderBack {
                 if(msg.contains("之前")||msg.contains("以前")){
                     this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
                     DateTime d = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),0,0);
-                    response.getSemantic().getSlots().getDatetime().setDuration(this.dt.getMillis()-d.getMillis());
+                    response.getSemantic().getSlots().getDatetime().setDuration(-(this.dt.getMillis()-d.getMillis()));
                 }
                 else if(msg.contains("之后")||msg.contains("以后")){
                     DateTime d = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.plusDays(1).getDayOfMonth(),0,0);
@@ -1233,7 +1233,7 @@ public class ReminderBack {
                 }
                 else{
                     this.dt = new DateTime(this.dt.getYear(),this.dt.getMonthOfYear(),this.dt.getDayOfMonth(),hour[1],hour[2]);
-                    response.getSemantic().getSlots().getDatetime().setDuration(3600000);
+                    response.getSemantic().getSlots().getDatetime().setDuration(0);
                 }
                 p = Pattern.compile("第\\d个");
                 m = p.matcher(msg);
