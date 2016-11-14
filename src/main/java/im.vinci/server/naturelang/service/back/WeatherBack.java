@@ -195,7 +195,6 @@ public class WeatherBack {
 		TextUnderstanderListener searchListener = new TextUnderstanderListener(){
 			//语义结果回调
 			public void onResult(UnderstanderResult result){
-				System.out.println(result.getResultString());
 				//log.info("Xunfei result is:"+result.toString());
 				try {
 					JSONObject json = new JSONObject(result.getResultString());
@@ -236,7 +235,6 @@ public class WeatherBack {
 								;
 							}
 							else{
-								System.out.println("城市不一样");
 								re_result.put("rtext", "城市不一样");
 								break;
 							}
@@ -250,7 +248,6 @@ public class WeatherBack {
 						}
 						semantic_t.put("slots",jsonobject);
 						re_result.put("semantic", semantic_t);
-						System.out.println(re_result);
 						String answer = "";
 						String date = queryDate.split("-")[0]+"年"+queryDate.split("-")[1].replace("0", "")+"月"+queryDate.split("-")[2].replace("0", "")+"日";
 						String area = city;//province + city;
@@ -261,7 +258,6 @@ public class WeatherBack {
 						String wind = jsonobject.getString("wind").replace(" ", "");//+jsonobject.get("windLevel").toString()+"级";
 						answer = date+","+area+","+weather+","+low_temp+high_temp+","+wind;
 						//response.setText(answer);
-						System.out.println(answer);
 					}
 						/*else if(json.get("rc").toString().equals("0") && "QUERY".equals(json.getString("operation")) && "pm25".equals(json.getString("service"))){
 							re_result.put("rc", 0);
@@ -302,7 +298,6 @@ public class WeatherBack {
 						//re_result.put("date", j.getString("date").equals("CURRENT_DAY")?"今天":j.getString("dateOrig"));
 						re_result.put("datetime","今天");
 					}
-					System.out.println("result is : "+re_result.toString());
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -333,7 +328,6 @@ public class WeatherBack {
 		}
 		try{
 			String url = "http://ltpapi.voicecloud.cn/analysis/?api_key=o1W4g5J1G3p7S895W8A9UqddqA5pGb9JugXPaWwJ&text="+msg+"&pattern=srl&format=json";
-			System.out.println(url);
 			URL realurl = new URL(url);
 			URLConnection con = realurl.openConnection();
 			con.connect();
@@ -343,7 +337,6 @@ public class WeatherBack {
 			while((line = in.readLine()) != null){
 				result += line;
 			}
-			System.out.println(result);
 			//JSONObject json = new JSONObject(result);
 			JSONArray jarray = new JSONArray(result);
 			jarray = (JSONArray) jarray.get(0);
@@ -354,16 +347,12 @@ public class WeatherBack {
 				}
 				else if(jarray.getJSONObject(i).getString("pos").equals("nt")){
 				}
-				System.out.println(jarray.getJSONObject(i).toString());
 			}
-			System.out.println(jarray);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			//log.info(e.getMessage());
 		}
-		System.out.println(city);
-		System.out.println(city.split(" ").length);
 		return city;
 	}
 
@@ -380,7 +369,6 @@ public class WeatherBack {
 			while((line = in.readLine())!=null){
 				result += line;
 			}
-			System.out.println(result);
 			JSONObject json = new JSONObject(result);
 			json = json.getJSONObject("regeocode").getJSONObject("addressComponent");
 			if(!json.get("province").toString().contains("[")){

@@ -39,7 +39,7 @@ public class GuideBack {
 			if(xgr.getStart_current() && xgr.getStartPOI() == null){
 				//直接用定位的经纬度
 				rg.getSemantic().getSlots().setGuide(true);
-				System.out.println("从定位地点出发");
+//				System.out.println("从定位地点出发");
 				//start = lat_lon;
 			}
 			else if(xgr.getStart_current() && xgr.getStartPOI() != null){

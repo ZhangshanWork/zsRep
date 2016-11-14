@@ -47,7 +47,7 @@ public class CommonUtils {
         Segment segment = HanLP.newSegment().enablePlaceRecognize(true);
         List<Term> termList = segment.seg(text);
         for (Term term : termList) {
-            System.out.println(term);
+//            System.out.println(term);
             if (term.toString().contains("ns")) {
                 flag = true;
                 break;

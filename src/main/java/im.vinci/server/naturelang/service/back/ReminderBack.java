@@ -768,7 +768,6 @@ public class ReminderBack {
                         month[0]=d.getMonthOfYear();
                         month[1]=d.getDayOfMonth();
                         month[2]=d.getYear();
-                        System.out.println("这个月底"+month[0]+"?"+month[1]);
                     }
                 }
             }

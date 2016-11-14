@@ -133,7 +133,6 @@ public class PmBack {
 		TextUnderstanderListener searchListener = new TextUnderstanderListener(){
 			//语义结果回调
 			public void onResult(UnderstanderResult result){
-				System.out.println(result.getResultString());
 				log.info("Xunfei result is:"+result.toString());
 				try {
 					JSONObject json = new JSONObject(result.getResultString());
@@ -207,7 +206,6 @@ public class PmBack {
 		}
 		try{
 			String url = "http://ltpapi.voicecloud.cn/analysis/?api_key=o1W4g5J1G3p7S895W8A9UqddqA5pGb9JugXPaWwJ&text="+msg+"&pattern=srl&format=json";
-			System.out.println(url);
 			URL realurl = new URL(url);
 			URLConnection con = realurl.openConnection();
 			con.connect();
@@ -217,7 +215,6 @@ public class PmBack {
 			while((line = in.readLine()) != null){
 				result += line;
 			}
-			System.out.println(result);
 			//JSONObject json = new JSONObject(result);
 			JSONArray jarray = new JSONArray(result);
 			jarray = (JSONArray) jarray.get(0);
@@ -228,16 +225,12 @@ public class PmBack {
 				}
 				else if(jarray.getJSONObject(i).getString("pos").equals("nt")){
 				}
-				System.out.println(jarray.getJSONObject(i).toString());
 			}
-			System.out.println(jarray);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 			log.info(e.getMessage());
 		}
-		System.out.println(city);
-		System.out.println(city.split(" ").length);
 		return city;
 	}
 
@@ -254,7 +247,6 @@ public class PmBack {
 			while((line = in.readLine())!=null){
 				result += line;
 			}
-			System.out.println(result);
 			JSONObject json = new JSONObject(result);
 			json = json.getJSONObject("regeocode").getJSONObject("addressComponent");
 			if(!json.get("province").toString().contains("[")){
