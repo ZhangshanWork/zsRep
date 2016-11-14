@@ -419,6 +419,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
             }
             responseResult.setData(resp);
             responseResult.setOperation(CodeEnum.music_genre.toString());
+            responseResult.setSpeech("正在为你下载，边下边听吧");
         } else if(StringUtils.isNotEmpty(music.getSong())) {
             responseResult.setData(this.QueryXiamiSongsByKeyword(music, 30, false));
             responseResult.setOperation(CodeEnum.music_song.toString());
@@ -433,22 +434,22 @@ public class NatureLangV2Controller extends NatureLangBaseController{
             filterMusicDownloadDataForArtistName(responseResult , music);
         }
         if (StringUtils.isEmpty(responseResult.getSpeech())) {
-            responseResult.setSpeech(ObjectUtils.iflyAsrFilter("正在为你下载"));
+            responseResult.setSpeech("正在为你下载");
         }
     }
 
     private void filterMusicDownloadDataForAlbumName(ResponseResult responseResult, MusicSemantic music, MusicAlbum album) {
         if (album == null) {
             responseResult.setData(null);
-            responseResult.setSpeech(ObjectUtils.iflyAsrFilter("没有找到"+ toPlainTextOfMusic(music, null, null)));
+            responseResult.setSpeech("没有找到"+ toPlainTextOfMusic(music, null, null));
             return;
         }
         if (music.getAlbum().equals(album.getAlbum_name()) || music.getAlbum().equals(album.getSub_title())) {
             responseResult.setData(album);
-            responseResult.setSpeech(ObjectUtils.iflyAsrFilter("正在为你下载"+ toPlainTextOfMusic(null,null,album)));
+            responseResult.setSpeech("正在为你下载"+ toPlainTextOfMusic(null,null,album));
         } else {
             responseResult.setData(null);
-            responseResult.setSpeech(ObjectUtils.iflyAsrFilter("没有找到"+ toPlainTextOfMusic(music,null,null)+ ", 是要找" + toPlainTextOfMusic(null,null,album)+ "么"));
+            responseResult.setSpeech("没有找到"+ toPlainTextOfMusic(music,null,null)+ ", 是要找" + toPlainTextOfMusic(null,null,album)+ "么");
         }
     }
 
@@ -456,7 +457,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
     private void filterMusicDownloadDataForArtistName(ResponseResult model, MusicSemantic music) {
         ResponsePageVo<MusicSong> musicSongResponsePageVo = (ResponsePageVo<MusicSong>) model.getData();
         if (musicSongResponsePageVo == null || CollectionUtils.isEmpty(musicSongResponsePageVo.getData())) {
-            model.setSpeech(ObjectUtils.iflyAsrFilter("没有找到"+ toPlainTextOfMusic(music, null, null)));
+            model.setSpeech("没有找到"+ toPlainTextOfMusic(music, null, null));
             return;
         }
         List<MusicSong> songs = Lists.newArrayListWithCapacity(10);
@@ -475,9 +476,9 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         musicSongResponsePageVo.setPage(1);
         musicSongResponsePageVo.setData(songs);
         if (songs.size() > 0) {
-            model.setSpeech(ObjectUtils.iflyAsrFilter("正在为你下载"+ toPlainTextOfMusic(music, null, null)));
+            model.setSpeech("正在为你下载"+ toPlainTextOfMusic(music, null, null));
         } else {
-            model.setSpeech(ObjectUtils.iflyAsrFilter("没有找到" + toPlainTextOfMusic(music, null, null)));
+            model.setSpeech("没有找到" + toPlainTextOfMusic(music, null, null));
         }
     }
 
@@ -485,7 +486,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
     private void filterMusicDownloadDataForSongName(ResponseResult model , MusicSemantic music) {
         ResponsePageVo<MusicSong> musicSongResponsePageVo = (ResponsePageVo<MusicSong>) model.getData();
         if (musicSongResponsePageVo == null || CollectionUtils.isEmpty(musicSongResponsePageVo.getData())) {
-            model.setSpeech(ObjectUtils.iflyAsrFilter("没有找到"+ toPlainTextOfMusic(music, null, null)));
+            model.setSpeech("没有找到"+ toPlainTextOfMusic(music, null, null));
             return;
         }
         MusicSong mostSimilarSong = null;
@@ -518,7 +519,7 @@ public class NatureLangV2Controller extends NatureLangBaseController{
             musicSongResponsePageVo.setTotalCount(1);
             musicSongResponsePageVo.setPage(1);
             musicSongResponsePageVo.setData(Lists.newArrayList(sameSong));
-            model.setSpeech(ObjectUtils.iflyAsrFilter("正在为你下载"+ toPlainTextOfMusic(null, sameSong, null)));
+            model.setSpeech("正在为你下载"+ toPlainTextOfMusic(null, sameSong, null));
             return;
         }
         musicSongResponsePageVo.setPageSize(10);
@@ -529,7 +530,6 @@ public class NatureLangV2Controller extends NatureLangBaseController{
         if (mostSimilarSong != null) {
             model.setSpeech( model.getSpeech() + ", 试一试"+ toPlainTextOfMusic(null, mostSimilarSong, null));
         }
-        model.setSpeech(ObjectUtils.iflyAsrFilter(model.getSpeech()));
     }
 
 
