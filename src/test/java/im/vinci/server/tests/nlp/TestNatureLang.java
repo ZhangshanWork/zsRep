@@ -18,6 +18,7 @@ import im.vinci.server.search.service.HimalayaSearchService;
 import im.vinci.server.search.service.XiamiMusicSearchService;
 import im.vinci.server.tests.utils.CreateFileUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -453,6 +454,79 @@ public class TestNatureLang {
             System.out.println(m1.group(0));
         }
     }
+
+    @Test
+    public void testDaxieRegular() {
+        Map<String ,Integer> map = new HashMap();
+           map.put("零", 0);
+           map.put("一", 1);
+           map.put("二", 2);
+           map.put("两", 2);
+           map.put("三", 3);
+           map.put("四", 4);
+           map.put("五", 5);
+           map.put("六", 6);
+           map.put("七", 7);
+           map.put("八", 8);
+           map.put("九", 9);
+        String msg = "五点四十五";
+        String regex = "[一二三四五六七八九]?千?[一二三四五六七八九]?百?[一二三四五六七八九]?十?[一二三四五六七八九零]?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(msg);
+        List<String> list = new ArrayList<>();//十位
+        List<String> list1 = new ArrayList<>();//个位
+        List<String> list2 = new ArrayList<>();//百位
+        List<String> list3 = new ArrayList<>();//千位
+        while (matcher.find()) {
+            if(StringUtils.isNotBlank(matcher.group())){
+                if (matcher.group().contains("千")) {
+                    list3.add(matcher.group());
+                } else if (matcher.group().contains("百")) {
+                    list2.add(matcher.group());
+                } else if (matcher.group().contains("十")) {
+                    list.add(matcher.group());
+                }
+                else {
+                    list1.add(matcher.group());
+                }
+            }
+        }
+        int result = 0;
+        for (String str : list) {
+            if (str.startsWith("十")) {
+                int gewei = map.get(str.replace("十", ""));
+                result = gewei+10;
+            } else if (str.endsWith("十")) {
+                int shiwei = map.get(str.replace("十", ""));
+                result = shiwei * 10;
+            }else{
+                int shiwei = map.get(str.substring(0, 1));
+                int gewei = map.get(str.substring(str.length() - 1, str.length()));
+                result = shiwei * 10 + gewei;
+            }
+            msg = msg.replace(str, result + "");
+        }
+
+        for (String str : list1) {
+            result = map.get(str);
+            msg = msg.replace(str, result + "");
+        }
+
+        for (String str : list3) {
+            int j = 1;
+            for(int i=1;i<str.length();i++) {
+                if (j % 2 != 0) {
+                    j++;
+                    result = map.get(str.substring(i - 1, i));
+                }
+            }
+            result = result * 1000;
+            map.get(1);
+        }
+        System.out.println(msg);
+
+    }
+    
 
     @Test
     public void testRegular1() {

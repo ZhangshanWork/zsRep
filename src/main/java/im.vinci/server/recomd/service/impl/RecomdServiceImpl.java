@@ -22,6 +22,8 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,8 @@ import java.util.List;
  */
 @Service
 public class RecomdServiceImpl implements RecomdService {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Resource(name = "esClient")
     private Client client;
     @Autowired
@@ -50,8 +54,8 @@ public class RecomdServiceImpl implements RecomdService {
         //对特定用户群，在时间：22：00 - 24：00；心率：60～90次/分   考虑时间跨度，时间设置在22~23
         //Arrays.binarySearch(imeis, recomdInput.getDevice_id());
         if (recomdInput.getHeartheat_current() >= 60 && recomdInput.getHeartheat_current() <= 90
-                && DateUtils.getNowHours() >= 21 && DateUtils.getNowHours() <= 22) {
-
+                && DateUtils.getNowHours() >= 10 && DateUtils.getNowHours() <= 22) {
+            log.info("request is coming : " + "mac is " + recomdInput.getDevice_id() +" ; time is " + DateUtils.getNowHours());
             return Context.generateRecmmdList();
         }
         List<String> list = new ArrayList<>();
