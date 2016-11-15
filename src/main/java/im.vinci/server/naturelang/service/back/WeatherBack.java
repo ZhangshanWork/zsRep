@@ -4,6 +4,8 @@ package im.vinci.server.naturelang.service.back;
 import com.iflytek.cloud.speech.*;
 import im.vinci.server.naturelang.domain.Parameter;
 import im.vinci.server.naturelang.domain.WeatherResponse;
+import im.vinci.server.naturelang.utils.CommonUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +31,7 @@ public class WeatherBack {
 		SpeechUtility.createUtility("appid=" + APPID);
 	}
 
-	public WeatherResponse get_weather(Parameter parameter){
+	public WeatherResponse get_weather(Parameter parameter,String ip){
 		//log.info("weather get service");
 		JSONObject temp_result = new JSONObject();
 		WeatherResponse response = new WeatherResponse();
@@ -56,6 +58,10 @@ public class WeatherBack {
 				city = get_city_lat(lat_lon);
 				query = city + query;
 				//System.out.println(city);
+			}
+			if (city.equals("") && StringUtils.isNoneBlank(ip)) {
+				city = CommonUtils.GetAddressByIp(ip);
+				query = city + query;
 			}
 			if(city.equals("")){
 				response.setRc(4);

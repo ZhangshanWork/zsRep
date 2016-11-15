@@ -1,9 +1,10 @@
 package im.vinci.server.naturelang.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.hankcs.hanlp.HanLP;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,9 +69,9 @@ public class CommonUtils {
         try{
             String str = getJsonContent("http://ip.taobao.com/service/getIpInfo.php?ip="+IP);
 
-            //System.out.println(str);
+            System.out.println(str);
 
-            JSONObject obj = JSONObject.fromObject(str);
+            JSONObject obj = JSON.parseObject(str);
             JSONObject obj2 =  (JSONObject) obj.get("data");
             String code = String.valueOf(obj.get("code"));
             if(code.equals("0")){

@@ -25,7 +25,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.servlet.support.RequestContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +48,10 @@ public class NatureLangV2Controller extends NatureLangBaseController{
      * @url /nlpresult/v1
      * */
     @RequestMapping(value = {"/nlpresult/v2"})
-    public ResultObject<ResponseResult> getNatureLangResult_v2(@RequestBody Parameter parameter) throws Exception {
+    public ResultObject<ResponseResult> getNatureLangResult_v2(@RequestBody Parameter parameter, HttpServletRequest request) throws Exception {
         ResponseResult responseResult = new ResponseResult();
         HashMap<String, Object> map = new HashMap<>();
+        map.put("ip", request.getRemoteAddr());
         String originQuery = "";//存储原始值，供回写使用
         if (StringUtils.isNotEmpty(parameter.getQuery())) {
             originQuery = parameter.getQuery();//存储原始值，供回写使用
@@ -201,7 +205,8 @@ public class NatureLangV2Controller extends NatureLangBaseController{
 
     //空气质量
     private void processPM25(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        PMResponse response_pm = new PmBack().getPM(parameter);
+        String ip = (String) map.getOrDefault("ip","");
+        PMResponse response_pm = new PmBack().getPM(parameter, ip);
         JSONObject semantic = new JSONObject();
 
         JSONObject slot = new JSONObject();
@@ -252,7 +257,8 @@ public class NatureLangV2Controller extends NatureLangBaseController{
 
     //天气
     private void processWeather(ResponseResult responseResult, Parameter parameter, Map<String, Object> map) throws Exception {
-        WeatherResponse response_weather = new WeatherBack().get_weather(parameter);
+        String ip = (String) map.getOrDefault("ip","");
+        WeatherResponse response_weather = new WeatherBack().get_weather(parameter,ip);
 
         JSONObject semantic = new JSONObject();
 
